@@ -41,11 +41,13 @@ const char kMessageTitlebarHeightName[] = "WindowTest.TitlebarHeight";
 // Create the appropriate platform test runner object.
 std::unique_ptr<WindowTestRunner> CreateWindowTestRunner(
     CefRefPtr<CefBrowser> browser) {
+#if Removed_by_SpoutBrowser
   auto root_window = RootWindow::GetForBrowser(browser->GetIdentifier());
   if (root_window->IsViewsHosted()) {
     // Browser is Views-hosted.
     return std::make_unique<WindowTestRunnerViews>();
   }
+#endif
 
 #if defined(OS_WIN)
   return std::make_unique<WindowTestRunnerWin>();

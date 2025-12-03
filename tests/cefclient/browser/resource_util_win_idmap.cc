@@ -9,6 +9,7 @@
 namespace client {
 
 int GetResourceId(const char* resource_name) {
+#if Removed_by_SpoutBrowser
   // Map of resource labels to BINARY id values.
   static struct _resource_map {
     const char* name;
@@ -49,7 +50,7 @@ int GetResourceId(const char* resource_name) {
       return i.id;
     }
   }
-
+#endif // Removed_by_SpoutBrowser
   return 0;
 }
 

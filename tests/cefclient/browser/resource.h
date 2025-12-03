@@ -21,6 +21,7 @@
 #define IDC_NAV_STOP 203
 #define ID_QUIT 32500
 #define ID_FIND 32501
+#if Removed_by_SpoutBrowser
 #define ID_POPOUT_OVERLAY 32502
 #define ID_TESTS_FIRST 32700
 #define ID_TESTS_GETSOURCE 32700
@@ -73,7 +74,7 @@
 #define IDS_WINDOW_ICON_1X_PNG 1026
 #define IDS_WINDOW_ICON_2X_PNG 1027
 #define IDS_XMLHTTPREQUEST_HTML 1028
-
+#endif // Removed_by_SpoutBrowser
 // Next default values for new objects
 //
 #ifdef APSTUDIO_INVOKED

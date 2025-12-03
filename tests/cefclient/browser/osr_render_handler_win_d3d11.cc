@@ -111,6 +111,14 @@ bool OsrRenderHandlerWinD3D11::Initialize(CefRefPtr<CefBrowser> browser,
   // Size to the whole composition.
   browser_layer_->move(0.0f, 0.0f, 1.0f, 1.0f);
 
+
+
+  // SpoutBrowser:
+  spout_sender_ = std::make_shared<spout::TextureSender>();
+  spout_sender_->Initialize((ID3D11Device*)(*device_));
+
+
+
   start_time_ = GetTimeNow();
 
   SetBrowser(browser);
@@ -221,6 +229,13 @@ void OsrRenderHandlerWinD3D11::Render() {
 
   // Render the scene.
   composition_->render(ctx);
+
+
+
+  // SpoutBrowser:
+  spout_sender_->SendTexture();
+
+
 
   // Present to window.
   swap_chain_->present(send_begin_frame() ? 0 : 1);

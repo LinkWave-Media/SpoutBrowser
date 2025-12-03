@@ -728,8 +728,10 @@ void ClientHandler::OnBeforeContextMenu(CefRefPtr<CefBrowser> browser,
       model->SetChecked(CLIENT_ID_OFFLINE, true);
     }
 
+#if Removed_by_SpoutBrowser
     // Test context menu features.
     BuildTestMenu(browser, model);
+#endif
   }
 
   if (delegate_) {

@@ -145,6 +145,17 @@ project(cef)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 
+
+# SpoutBrowser: download Spout (then use ${spout_SOURCE_DIR})
+message("Fetching Spout ${SPOUT_TAG}...")
+include(FetchContent)
+FetchContent_Declare(Spout
+    GIT_REPOSITORY https://github.com/leadedge/Spout2.git
+    GIT_TAG        ${SPOUT_TAG}  # Tag variable set by _SpoutBrowser_generate_solution.bat
+)
+FetchContent_Populate(Spout)
+
+
 #
 # CEF_ROOT setup.
 # This variable must be set to locate the binary distribution.
@@ -223,9 +234,11 @@ add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
 # TODO: Change these lines to match your project target when you copy this file.
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests")
   add_subdirectory(tests/cefsimple)
+#[===[ SpoutBrowser: skip
   add_subdirectory(tests/cefsimple_capi)
   add_subdirectory(tests/gtest)
   add_subdirectory(tests/ceftests)
+]===]
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/cefclient")

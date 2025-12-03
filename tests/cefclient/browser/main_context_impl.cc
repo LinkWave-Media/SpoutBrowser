@@ -18,7 +18,8 @@ namespace client {
 namespace {
 
 // The default URL to load in a browser window.
-const char kDefaultUrl[] = "https://www.google.com";
+//const char kDefaultUrl[] = "https://www.google.com";
+const char kDefaultUrl[] = "https://threejs.org/examples/#webgl_animation_keyframes";
 
 // Returns the ARGB value for |color|.
 cef_color_t ParseColor(const std::string& color) {
@@ -51,6 +52,10 @@ MainContextImpl::MainContextImpl(CefRefPtr<CefCommandLine> command_line,
   use_windowless_rendering_ =
       command_line_->HasSwitch(switches::kOffScreenRenderingEnabled);
 
+
+  use_windowless_rendering_ = true; // SpoutBrowser: always use OSR
+
+
   if (use_windowless_rendering_ &&
       command_line_->HasSwitch(switches::kOffScreenFrameRate)) {
     windowless_frame_rate_ =
@@ -67,6 +72,10 @@ MainContextImpl::MainContextImpl(CefRefPtr<CefCommandLine> command_line,
   shared_texture_enabled_ =
       use_windowless_rendering_ &&
       command_line_->HasSwitch(switches::kSharedTextureEnabled);
+
+
+  shared_texture_enabled_ = true; // SpoutBrowser: always use shared texture (and GPU)
+
 
   external_begin_frame_enabled_ =
       use_windowless_rendering_ &&

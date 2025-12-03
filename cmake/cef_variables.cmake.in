@@ -530,7 +530,7 @@ if(OS_WINDOWS)
     _WIN32_WINNT=0x0A00
     NTDDI_VERSION=NTDDI_WIN10_FE
     NOMINMAX                          # Use the standard's templated min/max
-    WIN32_LEAN_AND_MEAN               # Exclude less common API declarations
+    #WIN32_LEAN_AND_MEAN              # SpoutBrowser: SpoutFrameCount.cpp needs TIMECAPS, MMRESULT,..
     _HAS_EXCEPTIONS=0                 # Disable exceptions
     )
   list(APPEND CEF_COMPILER_DEFINES_RELEASE

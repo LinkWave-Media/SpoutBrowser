@@ -10,6 +10,9 @@
 #include "tests/cefclient/browser/osr_render_handler_win.h"
 #include "tests/cefclient/browser/osr_renderer_settings.h"
 
+// SpoutBrowser:
+#include "tests/cefclient/spout_browser/SpoutBrowser_TextureSender.h"
+
 namespace client {
 
 class BrowserLayer : public d3d11::Layer {
@@ -81,6 +84,11 @@ class OsrRenderHandlerWinD3D11 : public OsrRenderHandlerWin {
   std::shared_ptr<d3d11::Composition> composition_;
   std::shared_ptr<BrowserLayer> browser_layer_;
   std::shared_ptr<PopupLayer> popup_layer_;
+
+
+  // SpoutBrowser:
+  std::shared_ptr<spout::TextureSender> spout_sender_;
+
 
   DISALLOW_COPY_AND_ASSIGN(OsrRenderHandlerWinD3D11);
 };

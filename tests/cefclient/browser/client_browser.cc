@@ -82,6 +82,10 @@ class ClientBrowserDelegate : public ClientAppBrowser::Delegate {
     // Create a new root window based on |command_line|.
     auto config = std::make_unique<RootWindowConfig>(command_line->Copy());
 
+
+    config->with_osr = true; // SpoutBrowser: always use OSR
+
+
     MainContext::Get()->GetRootWindowManager()->CreateRootWindow(
         std::move(config));
 

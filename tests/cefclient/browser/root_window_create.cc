@@ -18,9 +18,11 @@ namespace client {
 // static
 scoped_refptr<RootWindow> RootWindow::Create(bool use_views,
                                              bool use_alloy_style) {
+#if Removed_by_SpoutBrowser
   if (use_views) {
     return new RootWindowViews(use_alloy_style);
   }
+#endif
 
 #if defined(OS_WIN)
   return new RootWindowWin(use_alloy_style);

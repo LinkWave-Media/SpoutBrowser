@@ -544,6 +544,7 @@ void RunTest(CefRefPtr<CefBrowser> browser, int id) {
     return;
   }
 
+#if Removed_by_SpoutBrowser
   switch (id) {
     case ID_TESTS_GETSOURCE:
       RunGetSourceTest(browser);
@@ -603,6 +604,7 @@ void RunTest(CefRefPtr<CefBrowser> browser, int id) {
       CefDumpWithoutCrashing();
       break;
   }
+#endif // Removed_by_SpoutBrowser
 }
 
 std::string DumpRequestContents(CefRefPtr<CefRequest> request) {
@@ -861,7 +863,7 @@ bool IsTestURL(const std::string& url, const std::string& path) {
 
 void CreateMessageHandlers(MessageHandlerSet& handlers) {
   handlers.insert(new PromptHandler);
-
+#if Removed_by_SpoutBrowser
   // Create the binary trasfer test handlers.
   binary_transfer_test::CreateMessageHandlers(handlers);
 
@@ -894,6 +896,7 @@ void CreateMessageHandlers(MessageHandlerSet& handlers) {
 
   // Create the window test handlers.
   window_test::CreateMessageHandlers(handlers);
+#endif // Removed_by_SpoutBrowser
 }
 
 void RegisterSchemeHandlers() {

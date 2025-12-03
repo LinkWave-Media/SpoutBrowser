@@ -266,13 +266,38 @@ endif()
 #
 
 if(OS_WINDOWS)
+
+
+  # SpoutBrowser: add Spout sources needed for DirectX texture sharing;
+  #   see https://github.com/leadedge/Spout2/tree/master/SPOUTSDK/SpoutDirectX and Tutorial04
+  set(CEFCLIENT_SPOUT_SRCS
+    ${spout_SOURCE_DIR}/SPOUTSDK/SpoutDirectX/SpoutDX/SpoutDX.h
+    ${spout_SOURCE_DIR}/SPOUTSDK/SpoutDirectX/SpoutDX/SpoutDX.cpp
+    ${spout_SOURCE_DIR}/SPOUTSDK/SpoutGL/SpoutCommon.h
+    ${spout_SOURCE_DIR}/SPOUTSDK/SpoutGL/SpoutCopy.h
+    ${spout_SOURCE_DIR}/SPOUTSDK/SpoutGL/SpoutCopy.cpp
+    ${spout_SOURCE_DIR}/SPOUTSDK/SpoutGL/SpoutDirectX.h
+    ${spout_SOURCE_DIR}/SPOUTSDK/SpoutGL/SpoutDirectX.cpp
+    ${spout_SOURCE_DIR}/SPOUTSDK/SpoutGL/SpoutFrameCount.h
+    ${spout_SOURCE_DIR}/SPOUTSDK/SpoutGL/SpoutFrameCount.cpp
+    ${spout_SOURCE_DIR}/SPOUTSDK/SpoutGL/SpoutSenderNames.h
+    ${spout_SOURCE_DIR}/SPOUTSDK/SpoutGL/SpoutSenderNames.cpp
+    ${spout_SOURCE_DIR}/SPOUTSDK/SpoutGL/SpoutSharedMemory.h
+    ${spout_SOURCE_DIR}/SPOUTSDK/SpoutGL/SpoutSharedMemory.cpp
+    ${spout_SOURCE_DIR}/SPOUTSDK/SpoutGL/SpoutUtils.h
+    ${spout_SOURCE_DIR}/SPOUTSDK/SpoutGL/SpoutUtils.cpp
+  )
+  source_group(Spout FILES ${CEFCLIENT_SPOUT_SRCS})
+
+
   # All sources required by the "cefclient" target. Generates an executable that
   # is used for all processes.
   set(CEFCLIENT_SRCS
     ${CEFCLIENT_BROWSER_SRCS}
     ${CEFCLIENT_COMMON_SRCS}
     ${CEFCLIENT_RENDERER_SRCS}
-    ${CEFCLIENT_RESOURCES_SRCS}
+#   ${CEFCLIENT_RESOURCES_SRCS}  SpoutBrowser: skip test resources
+    ${CEFCLIENT_SPOUT_SRCS}  # SpoutBrowser: add Spout sources
     ${CEFCLIENT_WINDOWS_SRCS}
     )
 
@@ -292,12 +317,13 @@ if(OS_WINDOWS)
     SET_LIBRARY_TARGET_PROPERTIES(${CEF_TARGET})
 
     # Copy and rename the bootstrap binary.
-    COPY_SINGLE_FILE(${CEF_TARGET} ${CEF_BINARY_DIR}/bootstrap.exe ${CEF_TARGET_OUT_DIR}/${CEF_TARGET}.exe)
+    COPY_SINGLE_FILE(${CEF_TARGET} ${CEF_BINARY_DIR}/bootstrap.exe ${CEF_TARGET_OUT_DIR}/SpoutBrowser.exe)
 
     if (CMAKE_GENERATOR MATCHES "Visual Studio")
       # Make the bootstrap binary the default command for the Visual Studio debugger.
       set_target_properties(${CEF_TARGET} PROPERTIES
-        VS_DEBUGGER_COMMAND "$<TARGET_FILE_DIR:${CEF_TARGET}>/${CEF_TARGET}.exe"
+        VS_DEBUGGER_COMMAND "$<TARGET_FILE_DIR:${CEF_TARGET}>/SpoutBrowser.exe"
+        OUTPUT_NAME "SpoutBrowser"  # SpoutBrowser: rename the target .dll
       )
     endif()
   else()
@@ -311,6 +337,11 @@ if(OS_WINDOWS)
     # Add the custom manifest files to the executable.
     ADD_WINDOWS_MANIFEST("${CMAKE_CURRENT_SOURCE_DIR}/win" "${CEF_TARGET}" "exe")
   endif()
+
+
+  # SpoutBrowser: allow to include Spout headers
+  target_include_directories(${CEF_TARGET} PRIVATE "${spout_SOURCE_DIR}")
+
 
   add_dependencies(${CEF_TARGET} libcef_dll_wrapper)
   target_link_libraries(${CEF_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS} d3d11.lib glu32.lib imm32.lib opengl32.lib)

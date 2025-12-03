@@ -757,6 +757,14 @@ LRESULT CALLBACK RootWindowWin::RootWndProc(HWND hWnd,
       break;
 
     case WM_SYSCOMMAND:
+
+
+      // SpoutBrowser: Handle the extended system menu: Find, About,..
+      if (self->OnCommand(LOWORD(wParam))) {
+          return 0;
+      }
+
+
       // Only necessary when running on the UI thread.
       if (CefCurrentlyOn(TID_UI)) {
         // Windows uses the 4 lower order bits of |wParam| for type-specific
@@ -1009,10 +1017,13 @@ bool RootWindowWin::OnEraseBkgnd() {
 }
 
 bool RootWindowWin::OnCommand(UINT id) {
+
+#if Removed_by_SpoutBrowser
   if (id >= ID_TESTS_FIRST && id <= ID_TESTS_LAST) {
     delegate_->OnTest(this, id);
     return true;
   }
+#endif
 
   switch (id) {
     case IDM_ABOUT:
@@ -1185,6 +1196,14 @@ void RootWindowWin::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 
     rect.top += urlbar_height;
 
+    // SpoutBrowser: We have removed the main menu, so extend the system menu with some items
+    HMENU hSysMenu = ::GetSystemMenu(hwnd_, FALSE);
+    ::AppendMenu(hSysMenu, MF_SEPARATOR, 0, NULL);
+    ::AppendMenu(hSysMenu, MF_STRING, ID_FIND, L"&Find...");
+    ::AppendMenu(hSysMenu, MF_STRING, IDM_ABOUT, L"&About SpoutBrowser...");
+
+
+#if Removed_by_SpoutBrowser
     if (!with_osr_) {
       // Remove the menu items that are only used with OSR.
       HMENU hMenu = ::GetMenu(hwnd_);
@@ -1196,6 +1215,8 @@ void RootWindowWin::OnCreate(LPCREATESTRUCT lpCreateStruct) {
         }
       }
     }
+#endif
+
   } else {
     // No controls so also remove the default menu.
     ::SetMenu(hwnd_, nullptr);
