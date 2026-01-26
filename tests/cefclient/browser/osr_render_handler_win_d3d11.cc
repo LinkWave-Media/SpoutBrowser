@@ -225,7 +225,10 @@ void OsrRenderHandlerWinD3D11::Render() {
   swap_chain_->resize(texture_size.first, texture_size.second);
 
   // Clear the render target.
-  swap_chain_->clear(0.0f, 0.0f, 1.0f, 1.0f);
+  //swap_chain_->clear(0.0f, 0.0f, 1.0f, 1.0f);
+  swap_chain_->clear(0.5f, 1.0f, 0.5f, 0.0f); // SpoutBrowser: allow transparent painting (alpha component is 0) (OsrRenderHandlerWin::settings_.background_color might be used?)
+
+
 
   // Render the scene.
   composition_->render(ctx);

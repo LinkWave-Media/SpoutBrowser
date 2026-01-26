@@ -18,7 +18,15 @@ if(NOT IS_DIRECTORY "${CEF_DOWNLOAD_DIR}/${CEF_DISTRIBUTION}")
 
     # Download the binary distribution.
     message(STATUS "Downloading ${CEF_DOWNLOAD_PATH}...")
-    file(DOWNLOAD "${CEF_DOWNLOAD_URL_ESCAPED}" "${CEF_DOWNLOAD_PATH}")
+    file(DOWNLOAD "${CEF_DOWNLOAD_URL_ESCAPED}" "${CEF_DOWNLOAD_PATH}"
+        STATUS status)
+
+    list(GET status 0 status_code)
+    list(GET status 1 status_string)
+    if(NOT status_code EQUAL 0)
+      file(REMOVE "${CEF_DOWNLOAD_PATH}")  # Clean up the partial/failed file
+      message(FATAL_ERROR "Failed to download CEF binary. Status ${status_code}: ${status_string}")
+    endif()
   endif()
 
   # Extract the binary distribution.

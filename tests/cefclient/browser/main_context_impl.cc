@@ -97,6 +97,10 @@ MainContextImpl::MainContextImpl(CefRefPtr<CefCommandLine> command_line,
   // Whether Alloy style will be used.
   use_alloy_style_ = command_line_->HasSwitch(switches::kUseAlloyStyle);
 
+
+  use_alloy_style_ = true; // SpoutBrowser: suppress the warning below
+
+
   if (use_windowless_rendering_ && !use_alloy_style_) {
     LOG(WARNING) << "Windowless rendering requires Alloy style.";
     use_alloy_style_ = true;
@@ -199,6 +203,14 @@ void MainContextImpl::PopulateSettings(CefSettings* settings) {
 
   CefString(&settings->cache_path) =
       command_line_->GetSwitchValue(switches::kCachePath);
+
+
+  // SpoutBrowser: use cache per app by default
+  CefString sCachePath(&settings->cache_path);
+  if (sCachePath.empty()) {
+      sCachePath = GetAppWorkingDirectory() + "cache";
+  }
+
 
   if (use_windowless_rendering_) {
     settings->windowless_rendering_enabled = true;

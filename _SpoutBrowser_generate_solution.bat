@@ -2,6 +2,19 @@
 setlocal
 
 :: =================================================================
+:: SpoutBrowser Solution Generator
+:: 
+:: This script automates the creation of a Visual Studio solution.
+:: Instead of building CEF from scratch, it works on top of prebuilt 
+:: CEF binaries, injecting SpoutBrowser logic into the sample application.
+::
+:: Workflow:
+:: 1. Downloads CEF distribution (from cef-builds.spotifycdn.com) to /_cef_binary.
+:: 2. Patches CEF sources/CMake scripts with SpoutBrowser code using Python.
+:: 3. Runs CMake to generate the solution in /_cef_binary/cef_binary_*/build.
+::    (Note: Spout2 dependency is fetched by CMake during this step).
+:: =================================================================
+
 :: Configuration
 
 :: See available distibutions: https://cef-builds.spotifycdn.com/index.html

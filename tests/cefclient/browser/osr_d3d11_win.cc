@@ -729,6 +729,7 @@ VS_OUTPUT main(VS_INPUT input)
 	return output;
 })--";
 
+#ifndef SPOUTBROWSER_WATERMARK
   const auto psh =
       R"--(Texture2D tex0 : register(t0);
 SamplerState samp0 : register(s0);
@@ -743,6 +744,30 @@ float4 main(VS_OUTPUT input) : SV_Target
 {
 	return tex0.Sample(samp0, input.tex);
 })--";
+#else // SPOUTBROWSER_WATERMARK
+  const auto psh =
+      R"--(Texture2D tex0 : register(t0);
+SamplerState samp0 : register(s0);
+
+struct VS_OUTPUT
+{
+	float4 pos : SV_POSITION;
+	float2 tex : TEXCOORD0;
+};
+
+float4 main(VS_OUTPUT input) : SV_Target
+{
+    bool shade = fmod(input.pos.x / 64.0, 4.0) < 1.0 && 
+                 fmod(input.pos.y / 64.0, 4.0) < 1.0 &&
+                 fmod(input.pos.x,        2.0) < 1.0 && 
+                 fmod(input.pos.y,        2.0) < 1.0;
+    if (shade) {
+        return float4(1.0, 1.0, 1.0, 1.0);
+    }
+
+	return tex0.Sample(samp0, input.tex);
+})--";
+#endif // SPOUTBROWSER_WATERMARK
 
   return create_effect(vsh, "main", "vs_4_0", psh, "main", "ps_4_0");
 }
