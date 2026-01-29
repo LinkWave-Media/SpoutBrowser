@@ -143,34 +143,34 @@
        d="M 224.00001,47.999999 H 166"
        id="path133" /><path
        style="fill:none;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;marker-end:url(#ConcaveTriangle)"
-       d="m 150,146 h 66 V 99.999997"
+       d="m 150,146 53.99999,0 0,-46.000001"
        id="path134" /><path
        style="fill:none;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;marker-end:url(#ConcaveTriangle)"
-       d="m 146,225.99999 h 54 V 166 h -84"
+       d="m 146,225.99999 47.99999,1e-5 0,-60 L 116,166"
        id="path135" /><path
        style="fill:none;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;marker-end:url(#ConcaveTriangle)"
        d="m 104,179.99999 h 10 V 154"
        id="path136" /><path
        style="fill:none;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;marker-end:url(#ConcaveTriangle)"
-       d="m 146,215.99999 h 60 V 49.999999"
+       d="M 146,215.99999 209.99999,216 V 50"
        id="path1" /><path
        style="fill:none;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;marker-end:url(#ConcaveTriangle)"
-       d="m 150,136 h 50 V 75.999998 h -14"
+       d="m 150,136 43.99999,0 V 76 L 186,75.999998"
        id="path2" /><path
        style="fill:none;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;marker-end:url(#Dot)"
-       d="m 184,93.999997 h 16"
+       d="M 184,93.999997 193.99999,94"
        id="path4" /><path
        style="fill:#fff6d5;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;marker-end:url(#ConcaveTriangle)"
        d="M 224.00001,97.999997 H 186"
        id="path5" /><path
        style="fill:none;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;marker-end:url(#Dot)"
-       d="m 126,104 h 74"
+       d="m 126,104 67.99999,0"
        id="path6" /><path
        style="fill:none;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;marker-end:url(#ConcaveTriangle)"
-       d="m 146,235.99999 h 66 V 148"
+       d="M 146,235.99999 199.99999,236 V 148"
        id="path8" /><path
        style="fill:#fff6d5;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;marker-start:url(#Dot);marker-end:url(#ConcaveTriangle)"
-       d="M 216,108 H 128"
+       d="M 203.99999,108 128,108"
        id="path9" /></g><g
      id="layer1"
      transform="translate(0,-14)"><text
@@ -180,184 +180,184 @@
        style="font-size:21.3333px;line-height:1.5;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect1);display:inline;fill:#000000"><tspan
          x="24.060547"
          y="126.69999"
-         id="tspan3"><tspan
+         id="tspan62"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan2">SpoutBrowser/
+           id="tspan1">SpoutBrowser/
 </tspan></tspan><tspan
          x="24.060547"
          y="159.65257"
-         id="tspan5"><tspan
+         id="tspan64"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan4">    _cef_binary/
+           id="tspan63">    _cef_binary/
 </tspan></tspan><tspan
          x="24.060547"
          y="192.60514"
-         id="tspan7"><tspan
+         id="tspan66"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan6">            cef_binary_142.0.17/
+           id="tspan65">            cef_binary_142.0.17/
 </tspan></tspan><tspan
          x="24.060547"
          y="225.55772"
-         id="tspan9"><tspan
+         id="tspan68"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan8">                build/
+           id="tspan67">                build/
 </tspan></tspan><tspan
          x="24.060547"
          y="258.51029"
-         id="tspan11"><tspan
+         id="tspan70"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan10">                        tests/cefclient/
+           id="tspan69">                        tests/cefclient/
 </tspan></tspan><tspan
          x="24.060547"
          y="291.46287"
-         id="tspan13"><tspan
+         id="tspan72"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan12">                                SpoutBrowser.exe
+           id="tspan71">                                SpoutBrowser.exe
 </tspan></tspan><tspan
          x="24.060547"
          y="324.41545"
-         id="tspan15"><tspan
+         id="tspan74"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan14">                        _deps/
+           id="tspan73">                        _deps/
 </tspan></tspan><tspan
          x="24.060547"
          y="357.36802"
-         id="tspan17"><tspan
+         id="tspan76"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan16">                                spout-src
+           id="tspan75">                                spout-src
 </tspan></tspan><tspan
          x="24.060547"
          y="390.3206"
-         id="tspan19"><tspan
+         id="tspan78"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan18">                        cef.sln
+           id="tspan77">                        cef.sln
 </tspan></tspan><tspan
          x="24.060547"
          y="423.27317"
-         id="tspan21"><tspan
+         id="tspan80"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan20">
+           id="tspan79">
 </tspan></tspan><tspan
          x="24.060547"
          y="456.22575"
-         id="tspan23"><tspan
+         id="tspan82"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan22">                tests/cefclient/
+           id="tspan81">                tests/cefclient/
 </tspan></tspan><tspan
          x="24.060547"
          y="489.17832"
-         id="tspan25"><tspan
+         id="tspan84"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan24">                        sources
+           id="tspan83">                        sources
 </tspan></tspan><tspan
          x="24.060547"
          y="522.1309"
-         id="tspan27"><tspan
+         id="tspan86"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan26">                        CMakeLists.txt
+           id="tspan85">                        CMakeLists.txt
 </tspan></tspan><tspan
          x="24.060547"
          y="555.08347"
-         id="tspan29"><tspan
+         id="tspan88"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan28">    
+           id="tspan87">    
 </tspan></tspan><tspan
          x="24.060547"
          y="588.03605"
-         id="tspan31"><tspan
+         id="tspan90"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan30">    tests/cefclient/
+           id="tspan89">    tests/cefclient/
 </tspan></tspan><tspan
          x="24.060547"
          y="620.98863"
-         id="tspan33"><tspan
+         id="tspan92"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan32">        code changes
+           id="tspan91">        code changes
 </tspan></tspan><tspan
          x="24.060547"
          y="653.9412"
-         id="tspan35"><tspan
+         id="tspan94"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan34">        CMakeLists.txt.in
+           id="tspan93">        CMakeLists.txt.in
 </tspan></tspan><tspan
          x="24.060547"
          y="686.89378"
-         id="tspan37"><tspan
+         id="tspan96"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan36">    
+           id="tspan95">    
 </tspan></tspan><tspan
          x="24.060547"
          y="719.84635"
-         id="tspan39"><tspan
+         id="tspan98"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan38">    _generate_solution.bat
+           id="tspan97">    _generate_solution.bat
 </tspan></tspan><tspan
          x="24.060547"
          y="752.79893"
-         id="tspan41"><tspan
+         id="tspan100"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan40">        1. cmake -P _DownloadCEF.cmake
+           id="tspan99">        1. cmake -P _DownloadCEF.cmake
 </tspan></tspan><tspan
          x="24.060547"
          y="785.7515"
-         id="tspan43"><tspan
+         id="tspan102"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan42">        2. _PatchCEF.py
+           id="tspan101">        2. _PatchCEF.py
 </tspan></tspan><tspan
          x="24.060547"
          y="818.70408"
-         id="tspan45"><tspan
+         id="tspan104"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan44">        3. cmake -G</tspan></tspan></text><text
+           id="tspan103">        3. cmake -G</tspan></tspan></text><text
        xml:space="preserve"
        transform="matrix(0.30328217,0,0,0.30328217,206.29185,-10.440289)"
        id="text131"
        style="font-size:21.3333px;line-height:1.5;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect131);display:inline;fill:#000000"><tspan
          x="24.060547"
          y="126.69999"
-         id="tspan47"><tspan
+         id="tspan106"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan46">
+           id="tspan105">
 </tspan></tspan><tspan
          x="24.060547"
          y="159.65257"
-         id="tspan49"><tspan
+         id="tspan108"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan48">cef-builds.spotifycdn.com
+           id="tspan107">cef-builds.spotifycdn.com
 </tspan></tspan><tspan
          x="24.060547"
          y="192.60514"
-         id="tspan51"><tspan
+         id="tspan110"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan50">    cef_binary_142.0.17
+           id="tspan109">    cef_binary_142.0.17
 </tspan></tspan><tspan
          x="24.060547"
          y="225.55772"
-         id="tspan53"><tspan
+         id="tspan112"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan52">
+           id="tspan111">
 </tspan></tspan><tspan
          x="24.060547"
          y="258.51029"
-         id="tspan55"><tspan
+         id="tspan114"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan54">
+           id="tspan113">
 </tspan></tspan><tspan
          x="24.060547"
          y="291.46287"
-         id="tspan57"><tspan
+         id="tspan116"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan56">
+           id="tspan115">
 </tspan></tspan><tspan
          x="24.060547"
          y="324.41545"
-         id="tspan59"><tspan
+         id="tspan118"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan58">github.com/leadedge/Spout2
+           id="tspan117">github.com/leadedge/Spout2
 </tspan></tspan><tspan
          x="24.060547"
          y="357.36802"
-         id="tspan61"><tspan
+         id="tspan120"><tspan
            style="font-family:Consolas;-inkscape-font-specification:Consolas"
-           id="tspan60">    2.007.017
+           id="tspan119">    2.007.017
 </tspan></tspan></text></g></svg>
