@@ -35,6 +35,25 @@ The diagram below illustrates the sequence of operations performed during the bu
 
 <img src="_SpoutBrowser_build_diagram.svg" width="600" alt="Build diagram"/>
 
+
+# Running
+
+SpoutBrowser supports standard `cefclient` command-line switches (see [cefclient/README.md](tests/cefclient/README.md)).
+
+**Common switches:**
+* `--url=<url>`
+* `--off-screen-frame-rate=<fps>` (default: 30)
+* `--transparent-painting-enabled` (enables alpha channel in Spout output)
+* `--cache-path=<path>` (default: `<app dir>/cache`)
+* `--always-on-top`
+* `--hide-controls`
+
+Detailed list: [common/client_switches.cc](tests/shared/common/client_switches.cc).
+
+**Note:** The following switches are ignored and forced to `true`:  
+`--off-screen-rendering-enabled`, `--shared-texture-enabled`, `--use-alloy-style`.
+
+
 # Licenses
 
 SpoutBrowser consists of several components with different licenses:
@@ -51,4 +70,5 @@ SpoutBrowser consists of several components with different licenses:
 3. SpoutBrowser code  
    All additional code written specifically for SpoutBrowser is licensed under the MIT License.
    See LICENSE.spoutbrowser.txt for details.
+
 
