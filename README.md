@@ -38,21 +38,26 @@ The diagram below illustrates the sequence of operations performed during the bu
 
 # Running
 
-SpoutBrowser supports standard `cefclient` command-line switches (see [cefclient/README.md](tests/cefclient/README.md)).
+SpoutBrowser supports standard cefclient command-line switches (see [cefclient/README.md](tests/cefclient/README.md)).
 
 **Common switches:**
-* `--url=<url>`
-* `--off-screen-frame-rate=<fps>` (default: 30)
-* `--transparent-painting-enabled` (enables alpha channel in Spout output)
-* `--cache-path=<path>` (default: `<app dir>/cache`)
-* `--always-on-top`
-* `--hide-controls`
+* **--url="https://your-content.com"** - Sets the starting page.
+* **--transparent-painting-enabled** - Enables the Alpha channel, useful for overlaying web content over other layers.
+* **--off-screen-frame-rate=60** - Sets preferred FPS; default is 30.  
+  (Note: use fps 60 with **--multi-threaded-message-loop** to avoid dragging/resizing issues, related to [#4008](https://github.com/chromiumembedded/cef/issues/4008)).
+* **--always-on-top** - Keeps the browser window in the foreground.
+* **--hide-controls** - Hides the address bar and navigation buttons.
 
-Detailed list: [common/client_switches.cc](tests/shared/common/client_switches.cc).
+Full list of switches: [common/client_switches.cc](tests/shared/common/client_switches.cc).
 
-**Note:** The following switches are ignored and forced to `true`:  
-`--off-screen-rendering-enabled`, `--shared-texture-enabled`, `--use-alloy-style`.
+**Note:** The following switches are ignored and forced to true: **--off-screen-rendering-enabled**, **--shared-texture-enabled**, **--use-alloy-style**.
 
+**Pro Tip:** Create a .bat file for quick startup:
+```batch
+SpoutBrowser.exe --transparent-painting-enabled ^
+                 --off-screen-frame-rate=60 --multi-threaded-message-loop ^
+                 --url="https://threejs.org/examples/"
+```
 
 # Licenses
 
@@ -70,5 +75,6 @@ SpoutBrowser consists of several components with different licenses:
 3. SpoutBrowser code  
    All additional code written specifically for SpoutBrowser is licensed under the MIT License.
    See LICENSE.spoutbrowser.txt for details.
+
 
 
