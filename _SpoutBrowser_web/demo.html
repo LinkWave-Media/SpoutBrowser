@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+	<!--
+		This page was used in a demo video for the SpoutBrowser app: https://github.com/bntre/SpoutBrowser
+	-->
+	<head>
+		<title>Transparent 3D scene - three.js</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body { font-family: Monospace; margin: 0; overflow: hidden; /* background-color: #7F7; */ }
+			canvas { display: block; }
+		</style>
+	</head>
+
+	<body>
+
+		<div id="container"></div>
+
+		<script type="importmap">
+			{
+				"imports": {
+					"three":         "https://unpkg.com/three@0.160.0/build/three.module.js",
+					"three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+				}
+			}
+		</script>
+
+		<script type="module">
+
+			const _threeJsUrl = 'https://rawcdn.githack.com/mrdoob/three.js/r160/';
+
+			import * as THREE from 'three';
+			import { OrbitControls }   from 'three/addons/controls/OrbitControls.js';
+			import { GLTFLoader }      from 'three/addons/loaders/GLTFLoader.js';
+			import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+			//-------------------------------------------------------------------------
+			// We use reverse perspective camera here: https://github.com/bntre/reverse-perspective-threejs
+			class CustomPerspectiveCamera extends THREE.PerspectiveCamera {
+				constructor(aspect, perspective, zoom, focus, near, far) {
+					// Call the parent constructor
+					super(50, aspect, near, far);
+					this.zoom = zoom;
+					this.focus = focus;
+					this.perspective = perspective;
+					this.updateProjectionMatrix();
+				}
+
+				updateProjectionMatrix() {
+					if (this.perspective === undefined) return; // called from super constructor - ignore
+
+					const size = 1 / this.zoom; // use as height half-size
+					const aspect = this.aspect;
+					const p = this.perspective / size;
+
+					let n = this.near - this.focus; // we put the camera to the focus plane (n is negative, f is positive)
+					let f = this.far  - this.focus;
+
+					// keep projection center out of clip range
+					if (p > 0) {
+						n = Math.max(n, -1 / p + 0.01);
+					} else if (p < 0) {
+						f = Math.min(f, -1 / p - 0.01);
+					}
+
+					const mP = new THREE.Matrix4();
+					const me = mP.elements;
+					me[0] = 1 / (size * aspect);
+					me[5] = 1 / size;
+					me[10] = (2 + p*(f+n))/(n-f);  // A   [-n,-f] -> [-1,1]
+					me[14] = 1 + f*(p + me[10]);  // B
+					me[11] = -p;
+					me[15] = 1;
+
+					// For more information about projection matrices: https://www.songho.ca/opengl/gl_projectionmatrix.html
+
+					// put the camera to the focus plane
+					const mT = new THREE.Matrix4();
+					mT.makeTranslation(0, 0, this.focus);
+					mP.multiply(mT);
+
+					this.projectionMatrix.copy(mP);
+					this.projectionMatrixInverse.copy(this.projectionMatrix).invert();
+				}
+			}
+
+			//-------------------------------------------------------------------------
+			// Renderer
+
+			const container = document.getElementById( 'container' );
+
+			const _renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
+			_renderer.setPixelRatio( window.devicePixelRatio );
+			_renderer.setSize( window.innerWidth, window.innerHeight );
+			_renderer.setAnimationLoop( animate );
+			container.appendChild( _renderer.domElement );
+
+			const distance = 10.0;
+			const _camera = new CustomPerspectiveCamera(
+				window.innerWidth / window.innerHeight,
+				0.0,  // perspective
+				0.5,  // zoom
+				distance,  // focus
+				distance - 7.0, distance + 7.0  // near/far
+			);
+			_camera.position.set( 0, 1, 1 ).normalize().multiplyScalar( distance );
+			_camera.updateMatrixWorld();
+
+			window.onresize = function () {
+				_camera.aspect = window.innerWidth / window.innerHeight;
+				_camera.updateProjectionMatrix();
+
+				_renderer.setSize( window.innerWidth, window.innerHeight );
+			};
+
+			//-------------------------------------------------------------------------
+			// Scene setup
+
+			const _scene = new THREE.Scene();
+			_scene.background = null;
+
+			const pmremGenerator = new THREE.PMREMGenerator( _renderer );
+			_scene.environment = pmremGenerator.fromScene( new RoomEnvironment(), 0.04 ).texture;
+
+			let _boxGroup = null;
+
+			const _musicBps = 72.3/60; // sync the dance to a music
+			const _boxRotationSpeed = _musicBps / 4; // turns per sec
+			const _perspectiveSpeed = _musicBps / 2;
+
+			const _perspectiveAmplitude = 1.0;
+
+			//-------------------------------------------------------------------------
+			// Load models
+
+			const _mixers = [];
+
+			const loader = new GLTFLoader();
+
+			const boxSize = 0.5;
+			const floorLevel = -3/2 * boxSize;
+
+			if (1) { // Michelle
+				loader.load( _threeJsUrl + 'examples/models/gltf/Michelle.glb', function ( gltf ) {
+					const model = gltf.scene;
+					const s = 1.0;
+					model.scale.set( s, s, s );
+					model.position.set( 0, floorLevel, 0.85 );
+					_scene.add( model );
+
+					const mixer = new THREE.AnimationMixer( model );
+					const danceBps = 8*4 / 18.2333; // Samba dance duration 18.2333 sec; 8*4 beats
+					mixer.clipAction( gltf.animations[ 0 ] ).setEffectiveTimeScale( _musicBps/danceBps ).play();
+					_mixers.push(mixer);
+
+				}, undefined, function ( e ) {
+					console.error( e );
+				} );
+			}
+
+			if (1) { // Box
+				_boxGroup = new THREE.Object3D(); // empty group
+				_scene.add(_boxGroup);
+
+				const geometry = new THREE.BoxGeometry( boxSize, boxSize, boxSize );
+				const materialS = new THREE.MeshStandardMaterial( {
+					color: 0xffffff,
+					transparent: true,
+					opacity: 0.7,
+				 } );
+				// Build the "object2"
+				const ii = [-1,0,1];
+				for (let i of ii) for (let j of ii) for (let k of ii) {
+					if (Math.min(i, j, k) > -1) continue;
+					if (Math.max(i, j, k) < 1) continue;
+					const pos = new THREE.Vector3(i, j, k).multiplyScalar(boxSize);
+					const cubeS = new THREE.Mesh( geometry, materialS );
+					cubeS.position.copy(pos);
+					_boxGroup.add( cubeS );
+				}
+			}
+
+			//-------------------------------------------------------------------------
+			// Orbit controls
+			let _orbitControls;
+			_orbitControls = new OrbitControls( _camera, _renderer.domElement );
+			_orbitControls.target.set( 0, -0.25, 0 );
+			_orbitControls.enableZoom = false; // don't change camera distance. manual zoom
+			_orbitControls.enablePan = false;
+			_orbitControls.enableRotate = true;
+			_orbitControls.update();
+
+			//-------------------------------------------------------------------------
+			// Loop
+
+			const _clock = new THREE.Clock();
+
+			function animate() {
+
+				const time  = _clock.elapsedTime;
+				const delta = _clock.getDelta();
+
+				for ( const m of _mixers ) {
+					m.update( delta );
+				}
+
+				// Rotate the box
+				_boxGroup.rotation.y += _boxRotationSpeed * Math.PI*2 * delta;
+
+				// Update perspective
+				_camera.perspective = Math.sin(_perspectiveSpeed * Math.PI*2 * time) * _perspectiveAmplitude;
+				_camera.updateProjectionMatrix();
+
+				_orbitControls.update();
+
+				_renderer.render( _scene, _camera );
+			}
+
+		</script>
+	</body>
+</html>
