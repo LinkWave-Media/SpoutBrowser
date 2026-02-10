@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 	<!--
-		This page was used in a demo video for the SpoutBrowser app: https://github.com/bntre/SpoutBrowser
+	This page was used in a demo video for the SpoutBrowser app: https://github.com/bntre/SpoutBrowser
 	-->
 	<head>
-		<title>Transparent 3D scene - three.js</title>
+		<title>Transparent three.js scene</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
@@ -126,7 +126,10 @@
 
 			let _boxGroup = null;
 
-			const _musicBps = 72.3/60; // sync the dance to a music
+			const urlParams = new URLSearchParams(window.location.search);
+			const musicBpm = parseFloat(urlParams.get('bpm')) || 72.3;
+
+			const _musicBps = musicBpm/60; // sync the dance to a music
 			const _boxRotationSpeed = _musicBps / 4; // turns per sec
 			const _perspectiveSpeed = _musicBps / 2;
 
@@ -145,14 +148,15 @@
 			if (1) { // Michelle
 				loader.load( _threeJsUrl + 'examples/models/gltf/Michelle.glb', function ( gltf ) {
 					const model = gltf.scene;
-					const s = 1.0;
+					const s = 1.1;
 					model.scale.set( s, s, s );
-					model.position.set( 0, floorLevel, 0.85 );
+					model.position.set( 0, floorLevel, 0.75 );
 					_scene.add( model );
 
 					const mixer = new THREE.AnimationMixer( model );
-					const danceBps = 8*4 / 18.2333; // Samba dance duration 18.2333 sec; 8*4 beats
-					mixer.clipAction( gltf.animations[ 0 ] ).setEffectiveTimeScale( _musicBps/danceBps ).play();
+					const dance = gltf.animations[ 0 ];
+					const danceBps = 8*4 / dance.duration; // Samba dance duration 18.2333 sec; 8*4 beats
+					mixer.clipAction( dance ).setEffectiveTimeScale( _musicBps/danceBps ).play();
 					_mixers.push(mixer);
 
 				}, undefined, function ( e ) {
