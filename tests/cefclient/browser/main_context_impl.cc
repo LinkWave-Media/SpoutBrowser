@@ -19,7 +19,7 @@ namespace {
 
 // The default URL to load in a browser window.
 //const char kDefaultUrl[] = "https://www.google.com";
-const char kDefaultUrl[] = "https://bntre.github.io/SpoutBrowser/";
+const char kDefaultUrl[] = "https://bntre.github.io/SpoutBrowser/"; // SpoutBrowser: custom splash screen
 
 // Returns the ARGB value for |color|.
 cef_color_t ParseColor(const std::string& color) {
@@ -54,6 +54,7 @@ MainContextImpl::MainContextImpl(CefRefPtr<CefCommandLine> command_line,
 
 
   use_windowless_rendering_ = true; // SpoutBrowser: always use OSR
+  windowless_frame_rate_ = 30; // SpoutBrowser: fps 30 by default
 
 
   if (use_windowless_rendering_ &&

@@ -226,7 +226,7 @@ void OsrRenderHandlerWinD3D11::Render() {
 
   // Clear the render target.
   //swap_chain_->clear(0.0f, 0.0f, 1.0f, 1.0f);
-  swap_chain_->clear(0.5f, 1.0f, 0.5f, 0.0f); // SpoutBrowser: allow transparent painting (alpha component is 0) (OsrRenderHandlerWin::settings_.background_color might be used?)
+  swap_chain_->clear(0.0f, 0.0f, 0.0f, 0.0f); // SpoutBrowser: allow transparent painting (alpha component is 0) (OsrRenderHandlerWin::settings_.background_color might be used?)
 
 
 

@@ -94,6 +94,7 @@
 			_renderer.setPixelRatio( window.devicePixelRatio );
 			_renderer.setSize( window.innerWidth, window.innerHeight );
 			_renderer.setAnimationLoop( animate );
+			_renderer.domElement.addEventListener('contextmenu', (e) => { e.stopImmediatePropagation(); }, true); // allow contextmenu
 			container.appendChild( _renderer.domElement );
 
 			const distance = 10.0;
