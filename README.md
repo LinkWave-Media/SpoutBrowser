@@ -1,7 +1,7 @@
 SpoutBrowser adds [Spout](https://spout.zeal.co/) texture-sending support to a Chromium-based browser.  
 This enables using any web content - WebGL, shaders, interactive pages - as a live video source in VJ software such as Resolume, MadMapper, and others.
 
-**Demo video**: https://www.youtube.com/watch?v=24Vd_2r3LPM
+**Demo video**: https://www.youtube.com/watch?v=vOFj6aN5QR4
 
 <a href="https://www.youtube.com/watch?v=vOFj6aN5QR4">
  <img src="https://img.youtube.com/vi/vOFj6aN5QR4/maxresdefault.jpg" width="600" alt="Video cover"/>
@@ -86,6 +86,7 @@ SpoutBrowser consists of several components with different licenses:
 3. SpoutBrowser code  
    All additional code written specifically for SpoutBrowser is licensed under the MIT License.
    See LICENSE.spoutbrowser.txt for details.
+
 
 
 
