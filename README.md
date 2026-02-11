@@ -7,6 +7,7 @@ This enables using any web content - WebGL, shaders, interactive pages - as a li
  <img src="https://img.youtube.com/vi/vOFj6aN5QR4/maxresdefault.jpg" width="600" alt="Video cover"/>
 </a>
 
+
 # Implementation
 
 This project is a fork of the Chromium Embedded Framework (CEF): https://github.com/chromiumembedded/cef  
@@ -17,6 +18,17 @@ This is the key difference from the existing [cef-spout](https://github.com/fg-u
 
 Spout integration uses CEF's off-screen rendering mode with shared textures and D3D11 rendering.  
 See the [SpoutBrowser_TextureSender](tests/cefclient/spout_browser) module for details.
+
+
+# Prebuilt Binaries
+
+If you prefer not to build from source, prebuilt Windows binaries are available on itch.io: https://bntr.itch.io/spout-browser  
+Two versions are provided:
+- **Free Demo** - fully functional, with a subtle checker-style watermark.
+- **Full Version** - no watermark, available for a small coffee-like price.
+
+Purchasing the full version is simply a way to support ongoing development.  
+Of course, you can always build SpoutBrowser yourself - see the instructions below.
 
 
 # Build
@@ -86,6 +98,7 @@ SpoutBrowser consists of several components with different licenses:
 3. SpoutBrowser code  
    All additional code written specifically for SpoutBrowser is licensed under the MIT License.
    See LICENSE.spoutbrowser.txt for details.
+
 
 
 
