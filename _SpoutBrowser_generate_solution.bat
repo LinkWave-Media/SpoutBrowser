@@ -28,11 +28,45 @@ set SPOUT_TAG=2.007.017
 set SKIP_PATCH=0
 set SKIP_GENERATE=0
 
+:: Detect Visual Studio version
+set VS_GENERATOR=Visual Studio 17 2022
+set VSWHERE="%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
+if exist %VSWHERE% (
+    for /f "tokens=1 delims=." %%i in ('%VSWHERE% -latest -property installationVersion') do (
+        if "%%i"=="15" set VS_GENERATOR=Visual Studio 15 2017
+        if "%%i"=="16" set VS_GENERATOR=Visual Studio 16 2019
+        if "%%i"=="17" set VS_GENERATOR=Visual Studio 17 2022
+        if "%%i"=="18" set VS_GENERATOR=Visual Studio 18 2026
+    )
+)
+
 
 :: =================================================================
 :: Common vars
 
-set "SCRIPT_DIR=%~dp0."
+set "SCRIPT_DIR_RAW=%~dp0"
+:: Remove trailing backslash if present
+if "%SCRIPT_DIR_RAW:~-1%"=="\" set "SCRIPT_DIR_RAW=%SCRIPT_DIR_RAW:~0,-1%"
+
+:: Find an available drive letter to subst to bypass MAX_PATH limit (260 characters)
+set "VS_DRIVE="
+for %%d in (S X Y Z B) do (
+    if not exist %%d:\ (
+        set "VS_DRIVE=%%d:\"
+        goto :FOUND_DRIVE
+    )
+)
+:FOUND_DRIVE
+
+if not defined VS_DRIVE (
+    echo WARNING: No available drive letter for subst. Path length limits may apply.
+    set "SCRIPT_DIR=%SCRIPT_DIR_RAW%"
+) else (
+    echo Mapping "%SCRIPT_DIR_RAW%" to virtual drive %VS_DRIVE:~0,2%
+    subst %VS_DRIVE:~0,2% "%SCRIPT_DIR_RAW%"
+    set "SCRIPT_DIR=%VS_DRIVE%"
+)
+
 set "CEF_DOWNLOAD_DIR=%SCRIPT_DIR%\_cef_binary"
 set "CEF_ROOT=%CEF_DOWNLOAD_DIR%\%CEF_DISTRIBUTION%"
 
@@ -74,7 +108,7 @@ set "CEF_ROOT=%CEF_DOWNLOAD_DIR%\%CEF_DISTRIBUTION%"
 
     python ^
         "%SCRIPT_DIR%\_SpoutBrowser_PatchCEF.py" ^
-        "%SCRIPT_DIR%" ^
+        "%SCRIPT_DIR%." ^
         "%CEF_ROOT%"
     
     if errorlevel 1 (
@@ -95,13 +129,14 @@ set "CEF_ROOT=%CEF_DOWNLOAD_DIR%\%CEF_DISTRIBUTION%"
     echo 3. CMake generate: "%CEF_ROOT%"
 
     set "BUILD_DIR=%CEF_ROOT%\build"
-    if not exist "%BUILD_DIR%\" mkdir "%BUILD_DIR%"
+    if exist "%BUILD_DIR%\" rd /s /q "%BUILD_DIR%"
+    mkdir "%BUILD_DIR%"
 
     :: -DUSE_SANDBOX=ON
 
     cmake ^
         -D "SPOUT_TAG=%SPOUT_TAG%" ^
-        -G "Visual Studio 17" ^
+        -G "%VS_GENERATOR%" ^
         -A x64 ^
         -B "%BUILD_DIR%" ^
         -S "%CEF_ROOT%"
@@ -117,10 +152,18 @@ set "CEF_ROOT=%CEF_DOWNLOAD_DIR%\%CEF_DISTRIBUTION%"
 
     echo ===========================================================
     echo Solution generated!
+    if defined VS_DRIVE (
+        echo Unmapping virtual drive %VS_DRIVE:~0,2%
+        subst %VS_DRIVE:~0,2% /d
+    )
     exit /b 0
 
 :ERROR
 
     echo ===========================================================
     echo Solution generation failed
+    if defined VS_DRIVE (
+        echo Unmapping virtual drive %VS_DRIVE:~0,2%
+        subst %VS_DRIVE:~0,2% /d
+    )
     exit /b 1

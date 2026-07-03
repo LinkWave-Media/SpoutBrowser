@@ -1,0 +1,9 @@
+# CEF binary distribution (large, download separately)
+_cef_binary/
+
+# Release builds
+Releases/
+
+# Python cache
+__pycache__/
+*.pyc

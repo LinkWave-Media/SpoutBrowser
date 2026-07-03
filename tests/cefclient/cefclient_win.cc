@@ -25,8 +25,32 @@
 #include "tests/shared/common/client_switches.h"
 #include "tests/shared/renderer/client_app_renderer.h"
 
+// Force the high-performance dedicated GPU on systems with switchable graphics
+// (e.g. laptops with Intel + NVIDIA/AMD). These exports are checked by the GPU
+// driver at process creation time, before any application code runs.
+extern "C" {
+__declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+
 namespace client {
 namespace {
+
+void SetHighPerformanceGpuPreference() {
+  HMODULE hDxgi = GetModuleHandleW(L"dxgi.dll");
+  if (!hDxgi) {
+    hDxgi = LoadLibraryW(L"dxgi.dll");
+  }
+  if (hDxgi) {
+    typedef HRESULT(WINAPI* PFN_SetProcessDefaultGpuPreference)(int);
+    PFN_SetProcessDefaultGpuPreference pfnSetProcessDefaultGpuPreference =
+        (PFN_SetProcessDefaultGpuPreference)GetProcAddress(hDxgi, "SetProcessDefaultGpuPreference");
+    if (pfnSetProcessDefaultGpuPreference) {
+      // 2 corresponds to DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE
+      pfnSetProcessDefaultGpuPreference(2);
+    }
+  }
+}
 
 // Configure code signing requirements. For a code signing example see
 // https://github.com/chromiumembedded/cef/issues/3824#issuecomment-2892139995
@@ -117,6 +141,7 @@ int RunMain(HINSTANCE hInstance,
             int nCmdShow,
             void* sandbox_info,
             cef_version_info_t* version_info) {
+  SetHighPerformanceGpuPreference();
   CefMainArgs main_args(hInstance);
 
   // Dynamically load the CEF library after code signing verification.
