@@ -18,7 +18,7 @@ setlocal
 :: Configuration
 
 :: See available distibutions: https://cef-builds.spotifycdn.com/index.html
-set CEF_DISTRIBUTION=cef_binary_142.0.17+g60aac24+chromium-142.0.7444.176_windows64
+set CEF_DISTRIBUTION=cef_binary_149.0.6+g0d0eeb6+chromium-149.0.7827.201_windows64
 
 :: Spout tag (for CMake FetchContent_Declare)
 :: See avalable tags: https://github.com/leadedge/Spout2/tags
