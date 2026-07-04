@@ -205,10 +205,6 @@ void MainContextImpl::PopulateSettings(CefSettings* settings) {
   CefString(&settings->cache_path) =
       command_line_->GetSwitchValue(switches::kCachePath);
 
-  // Use a clean standard Chrome User Agent to bypass Google sign-in blocks on YouTube/Google services
-  CefString(&settings->user_agent) = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
-
-
   // SpoutBrowser: use cache per app by default
   CefString sCachePath(&settings->cache_path);
   if (sCachePath.empty()) {
