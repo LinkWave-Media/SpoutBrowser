@@ -27,8 +27,8 @@
 #include "tests/shared/common/client_switches.h"
 
 #define MAX_URL_LENGTH 255
-#define BUTTON_WIDTH 72
-#define URLBAR_HEIGHT 24
+#define BUTTON_WIDTH 36
+#define URLBAR_HEIGHT 34
 
 namespace client {
 
@@ -911,7 +911,7 @@ void RootWindowWin::OnSize(bool minimized) {
       font_ =
           ::CreateFont(-font_height, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE,
                        DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                       DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Arial");
+                       DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Segoe UI");
 
       SendMessage(back_hwnd_, WM_SETFONT, reinterpret_cast<WPARAM>(font_),
                   TRUE);
@@ -929,6 +929,8 @@ void RootWindowWin::OnSize(bool minimized) {
     rect.top += urlbar_height;
 
     int x_offset = rect.left;
+    const int padding = LogicalToDevice(4, GetWindowScaleFactor(hwnd_));
+    const int ctrl_height = urlbar_height - padding * 2;
 
     // |browser_hwnd| may be nullptr if the browser has not yet been created.
     HWND browser_hwnd = nullptr;
@@ -938,20 +940,20 @@ void RootWindowWin::OnSize(bool minimized) {
 
     // Resize all controls.
     HDWP hdwp = BeginDeferWindowPos(browser_hwnd ? 6 : 5);
-    hdwp = DeferWindowPos(hdwp, back_hwnd_, nullptr, x_offset, 0, button_width,
-                          urlbar_height, SWP_NOZORDER);
+    hdwp = DeferWindowPos(hdwp, back_hwnd_, nullptr, x_offset, padding, button_width,
+                          ctrl_height, SWP_NOZORDER);
     x_offset += button_width;
-    hdwp = DeferWindowPos(hdwp, forward_hwnd_, nullptr, x_offset, 0,
-                          button_width, urlbar_height, SWP_NOZORDER);
+    hdwp = DeferWindowPos(hdwp, forward_hwnd_, nullptr, x_offset, padding,
+                          button_width, ctrl_height, SWP_NOZORDER);
     x_offset += button_width;
-    hdwp = DeferWindowPos(hdwp, reload_hwnd_, nullptr, x_offset, 0,
-                          button_width, urlbar_height, SWP_NOZORDER);
+    hdwp = DeferWindowPos(hdwp, reload_hwnd_, nullptr, x_offset, padding,
+                          button_width, ctrl_height, SWP_NOZORDER);
     x_offset += button_width;
-    hdwp = DeferWindowPos(hdwp, stop_hwnd_, nullptr, x_offset, 0, button_width,
-                          urlbar_height, SWP_NOZORDER);
+    hdwp = DeferWindowPos(hdwp, stop_hwnd_, nullptr, x_offset, padding, button_width,
+                          ctrl_height, SWP_NOZORDER);
     x_offset += button_width;
-    hdwp = DeferWindowPos(hdwp, edit_hwnd_, nullptr, x_offset, 0,
-                          rect.right - x_offset, urlbar_height, SWP_NOZORDER);
+    hdwp = DeferWindowPos(hdwp, edit_hwnd_, nullptr, x_offset + padding, padding,
+                          rect.right - x_offset - padding * 2, ctrl_height, SWP_NOZORDER);
 
     if (browser_hwnd) {
       hdwp = DeferWindowPos(hdwp, browser_hwnd, nullptr, rect.left, rect.top,
@@ -1150,32 +1152,35 @@ void RootWindowWin::OnCreate(LPCREATESTRUCT lpCreateStruct) {
     const int button_width = GetButtonWidth(hwnd_);
     const int urlbar_height = GetURLBarHeight(hwnd_);
 
+    const int padding = LogicalToDevice(4, GetWindowScaleFactor(hwnd_));
+    const int ctrl_height = urlbar_height - padding * 2;
+
     back_hwnd_ = CreateWindow(
-        L"BUTTON", L"Back", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED,
-        x_offset, 0, button_width, urlbar_height, hwnd_,
+        L"BUTTON", L"←", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED,
+        x_offset, padding, button_width, ctrl_height, hwnd_,
         reinterpret_cast<HMENU>(IDC_NAV_BACK), hInstance, nullptr);
     CHECK(back_hwnd_);
     x_offset += button_width;
 
     forward_hwnd_ = CreateWindow(
-        L"BUTTON", L"Forward",
-        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED, x_offset, 0,
-        button_width, urlbar_height, hwnd_,
+        L"BUTTON", L"→",
+        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED, x_offset, padding,
+        button_width, ctrl_height, hwnd_,
         reinterpret_cast<HMENU>(IDC_NAV_FORWARD), hInstance, nullptr);
     CHECK(forward_hwnd_);
     x_offset += button_width;
 
     reload_hwnd_ = CreateWindow(
-        L"BUTTON", L"Reload",
-        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED, x_offset, 0,
-        button_width, urlbar_height, hwnd_,
+        L"BUTTON", L"↻",
+        WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED, x_offset, padding,
+        button_width, ctrl_height, hwnd_,
         reinterpret_cast<HMENU>(IDC_NAV_RELOAD), hInstance, nullptr);
     CHECK(reload_hwnd_);
     x_offset += button_width;
 
     stop_hwnd_ = CreateWindow(
-        L"BUTTON", L"Stop", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED,
-        x_offset, 0, button_width, urlbar_height, hwnd_,
+        L"BUTTON", L"✕", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED,
+        x_offset, padding, button_width, ctrl_height, hwnd_,
         reinterpret_cast<HMENU>(IDC_NAV_STOP), hInstance, nullptr);
     CHECK(stop_hwnd_);
     x_offset += button_width;
@@ -1184,7 +1189,7 @@ void RootWindowWin::OnCreate(LPCREATESTRUCT lpCreateStruct) {
         CreateWindow(L"EDIT", nullptr,
                      WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT |
                          ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_DISABLED,
-                     x_offset, 0, rect.right - button_width * 4, urlbar_height,
+                     x_offset + padding, padding, rect.right - x_offset - padding * 2, ctrl_height,
                      hwnd_, nullptr, hInstance, nullptr);
     CHECK(edit_hwnd_);
 
