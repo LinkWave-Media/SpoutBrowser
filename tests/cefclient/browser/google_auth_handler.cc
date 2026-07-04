@@ -25,7 +25,7 @@ namespace {
 
 // IMPORTANT: Replace this placeholder client ID with your actual Google OAuth Client ID
 // (configured as a "Desktop app" client type in the Google Cloud Console).
-const char kGoogleClientId[] = "822792610543-n17vmdt22d8jef2u30e1r4fkmjsc9926.apps.googleusercontent.com";
+const char kGoogleClientId[] = "467270992671-fdemtfgad80mok466hv1tb0lpgrr5ien.apps.googleusercontent.com";
 
 const char kGoogleAuthUrl[] = "https://accounts.google.com/o/oauth2/v2/auth";
 const char kGoogleTokenUrl[] = "https://oauth2.googleapis.com/token";
