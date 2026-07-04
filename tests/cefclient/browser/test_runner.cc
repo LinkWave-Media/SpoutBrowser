@@ -3,6 +3,7 @@
 // can be found in the LICENSE file.
 
 #include "tests/cefclient/browser/test_runner.h"
+#include "tests/cefclient/browser/google_auth_handler.h"
 
 #include <algorithm>
 #include <map>
@@ -863,6 +864,7 @@ bool IsTestURL(const std::string& url, const std::string& path) {
 
 void CreateMessageHandlers(MessageHandlerSet& handlers) {
   handlers.insert(new PromptHandler);
+  handlers.insert(new GoogleAuthHandler);
 #if Removed_by_SpoutBrowser
   // Create the binary trasfer test handlers.
   binary_transfer_test::CreateMessageHandlers(handlers);

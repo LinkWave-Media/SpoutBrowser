@@ -8,12 +8,114 @@ This scene refers to the "Object2" reverse perspective experiment: https://githu
   html, body { width: 100%; height: 100%; margin: 0; border: 0; overflow: hidden; }
   #link { position: absolute; top: 15px; left: 15px; display: flex; gap: 5px; color: #777; font-size: 14px; }
   #link img { height: 15px; }
+  #auth-container {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(30, 30, 46, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(137, 180, 250, 0.2);
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: #cdd6f4;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    min-width: 200px;
+    z-index: 1000;
+  }
+  .google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #ffffff;
+    color: #1f1f1f;
+    border: 1px solid #dadce0;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color .15s, box-shadow .15s;
+    width: 100%;
+  }
+  .google-btn:hover {
+    background-color: #f8fafd;
+    box-shadow: 0 1px 3px rgba(60,64,67, 0.3), 0 4px 8px 3px rgba(60,64,67, 0.15);
+  }
+  .google-btn img {
+    width: 18px;
+    height: 18px;
+  }
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .user-name {
+    font-weight: 600;
+    color: #89b4fa;
+  }
+  .user-email {
+    font-size: 12px;
+    color: #a6adc8;
+    margin-bottom: 8px;
+  }
+  .logout-btn {
+    background: transparent;
+    border: 1px solid #f38ba8;
+    color: #f38ba8;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+  .logout-btn:hover {
+    background: #f38ba8;
+    color: #1e1e2e;
+  }
+  .spinner {
+    border: 2px solid rgba(137, 180, 250, 0.1);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border-left-color: #89b4fa;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 </style>
 <body>
 <a id="link" href="https://github.com/bntre/SpoutBrowser">
   <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" />
   <span>SpoutBrowser</span>
 </a>
+<div id="auth-container">
+  <div id="auth-unauthenticated" style="display: none;">
+    <button class="google-btn" onclick="startGoogleLogin()">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google G Logo"/>
+      <span>Sign in with Google</span>
+    </button>
+  </div>
+  <div id="auth-loading">
+    <div class="spinner"></div>
+    <span>Checking session...</span>
+  </div>
+  <div id="auth-authenticated" style="display: none;">
+    <div class="user-info">
+      <span class="user-name" id="user-name"></span>
+      <span class="user-email" id="user-email"></span>
+      <button class="logout-btn" onclick="googleLogout()">Sign out</button>
+    </div>
+  </div>
+</div>
 <canvas id="canvas"></canvas>
 <script type="text/javascript">
 
@@ -286,6 +388,91 @@ function animate(time) {
   requestAnimationFrame(animate);
 }
 requestAnimationFrame(animate);
+
+//------------------------------------------------------------------
+// Google Auth Integration
+
+function setAuthStatus(status, user) {
+  const elUnauth = document.getElementById('auth-unauthenticated');
+  const elLoading = document.getElementById('auth-loading');
+  const elAuth = document.getElementById('auth-authenticated');
+
+  elUnauth.style.display = 'none';
+  elLoading.style.display = 'none';
+  elAuth.style.display = 'none';
+
+  if (status === 'unauthenticated') {
+    elUnauth.style.display = 'block';
+  } else if (status === 'loading') {
+    elLoading.style.display = 'block';
+    const loadingText = user ? user.message : 'Waiting for authentication...';
+    elLoading.querySelector('span').innerText = loadingText;
+  } else if (status === 'authenticated') {
+    elAuth.style.display = 'block';
+    document.getElementById('user-name').innerText = user.name || 'User';
+    document.getElementById('user-email').innerText = user.email || '';
+  }
+}
+
+function startGoogleLogin() {
+  if (!window.cefQuery) {
+    alert("CEF Query interface not available.");
+    return;
+  }
+  setAuthStatus('loading', { message: 'Sign in started...' });
+  window.cefQuery({
+    request: 'google-login',
+    onSuccess: function(response) {
+      try {
+        const user = JSON.parse(response);
+        setAuthStatus('authenticated', user);
+      } catch (e) {
+        setAuthStatus('unauthenticated');
+      }
+    },
+    onFailure: function(error_code, error_message) {
+      alert('Login failed: ' + error_message);
+      setAuthStatus('unauthenticated');
+    }
+  });
+}
+
+function googleLogout() {
+  if (!window.cefQuery) return;
+  window.cefQuery({
+    request: 'google-logout',
+    onSuccess: function(response) {
+      setAuthStatus('unauthenticated');
+    }
+  });
+}
+
+// Initial session check
+window.addEventListener('DOMContentLoaded', () => {
+  if (window.cefQuery) {
+    window.cefQuery({
+      request: 'google-check-auth',
+      onSuccess: function(response) {
+        if (response && response !== 'none') {
+          try {
+            const user = JSON.parse(response);
+            setAuthStatus('authenticated', user);
+          } catch(e) {
+            setAuthStatus('unauthenticated');
+          }
+        } else {
+          setAuthStatus('unauthenticated');
+        }
+      },
+      onFailure: function() {
+        setAuthStatus('unauthenticated');
+      }
+    });
+  } else {
+    // Non-CEF browser fallback
+    setAuthStatus('unauthenticated');
+  }
+});
 
 </script>
 </body>
