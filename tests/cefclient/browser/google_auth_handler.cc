@@ -214,15 +214,17 @@ void GoogleAuthHandler::OnHttpRequest(CefRefPtr<CefServer> server,
 
     std::stringstream ss(query);
     std::string item;
+    cef_uri_unescape_rule_t unescape_rules = static_cast<cef_uri_unescape_rule_t>(
+        UU_NORMAL | UU_SPACES | UU_PATH_SEPARATORS | UU_URL_SPECIAL_CHARS_EXCEPT_PATH_SEPARATORS);
     while (std::getline(ss, item, '&')) {
       size_t eq = item.find('=');
       if (eq != std::string::npos) {
         std::string key = item.substr(0, eq);
         std::string val = item.substr(eq + 1);
         if (key == "code") {
-          code = val;
+          code = CefURIDecode(val, false, unescape_rules).ToString();
         } else if (key == "state") {
-          received_state = val;
+          received_state = CefURIDecode(val, false, unescape_rules).ToString();
         }
       }
     }
