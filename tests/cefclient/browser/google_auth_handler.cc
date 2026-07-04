@@ -92,6 +92,9 @@ std::vector<uint8_t> CalculateSha256(const std::string& input) {
 std::string Base64UrlEncode(const std::vector<uint8_t>& data) {
   CefString encoded = CefBase64Encode(data.data(), data.size());
   std::string s = encoded.ToString();
+  s.erase(std::remove(s.begin(), s.end(), '\r'), s.end());
+  s.erase(std::remove(s.begin(), s.end(), '\n'), s.end());
+  s.erase(std::remove(s.begin(), s.end(), ' '), s.end());
   std::replace(s.begin(), s.end(), '+', '-');
   std::replace(s.begin(), s.end(), '/', '_');
   s.erase(std::remove(s.begin(), s.end(), '='), s.end());
@@ -207,11 +210,10 @@ void GoogleAuthHandler::OnHttpRequest(CefRefPtr<CefServer> server,
   std::string path = CefString(&url_parts.path).ToString();
 
   if (path == "/callback") {
-    // Parse query params
     std::string query = CefString(&url_parts.query).ToString();
     std::string code;
     std::string received_state;
-
+    LOG(INFO) << "[GoogleAuth] Received callback query: " << query;
     std::stringstream ss(query);
     std::string item;
     cef_uri_unescape_rule_t unescape_rules = static_cast<cef_uri_unescape_rule_t>(
@@ -223,11 +225,15 @@ void GoogleAuthHandler::OnHttpRequest(CefRefPtr<CefServer> server,
         std::string val = item.substr(eq + 1);
         if (key == "code") {
           code = CefURIDecode(val, false, unescape_rules).ToString();
+          LOG(INFO) << "[GoogleAuth] Parsed code: " << code;
         } else if (key == "state") {
           received_state = CefURIDecode(val, false, unescape_rules).ToString();
+          LOG(INFO) << "[GoogleAuth] Parsed state: " << received_state;
         }
       }
     }
+
+    LOG(INFO) << "[GoogleAuth] Expected state: " << state_;
 
     if (received_state != state_) {
       server->SendHttp500Response(connection_id, "State parameter mismatch (potential CSRF).");
@@ -281,7 +287,7 @@ void GoogleAuthHandler::StopLocalServer() {
 void GoogleAuthHandler::LaunchSystemBrowser() {
   std::string auth_url = std::string(kGoogleAuthUrl) +
       "?client_id=" + UrlEncode(kGoogleClientId) +
-      "&redirect_uri=" + UrlEncode("http://localhost:3000/callback") +
+      "&redirect_uri=" + UrlEncode("http://127.0.0.1:3000/callback") +
       "&response_type=code" +
       "&scope=" + UrlEncode("openid email profile") +
       "&access_type=offline" +
@@ -304,8 +310,10 @@ void GoogleAuthHandler::ExchangeCodeForTokens(const std::string& code) {
       "client_id=" + UrlEncode(kGoogleClientId) +
       "&code=" + UrlEncode(code) +
       "&code_verifier=" + UrlEncode(code_verifier_) +
-      "&redirect_uri=" + UrlEncode("http://localhost:3000/callback") +
+      "&redirect_uri=" + UrlEncode("http://127.0.0.1:3000/callback") +
       "&grant_type=authorization_code";
+
+  LOG(INFO) << "[GoogleAuth] Exchanging code. Post data: " << post_data;
 
   CefRefPtr<CefPostData> postData = CefPostData::Create();
   CefRefPtr<CefPostDataElement> element = CefPostDataElement::Create();
@@ -319,6 +327,7 @@ void GoogleAuthHandler::ExchangeCodeForTokens(const std::string& code) {
 
   CefRefPtr<RequestClient> client = new RequestClient(base::BindOnce(
       [](CefRefPtr<GoogleAuthHandler> handler, int status, const std::string& data) {
+        LOG(INFO) << "[GoogleAuth] Token response status: " << status << ", body: " << data;
         if (status == 200) {
           CefRefPtr<CefValue> parsed = CefParseJSON(data, JSON_PARSER_ALLOW_TRAILING_COMMAS);
           if (parsed && parsed->GetType() == VTYPE_DICTIONARY) {
