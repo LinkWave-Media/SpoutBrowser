@@ -582,7 +582,8 @@ void LoadCookiesFromFile() {
       std::string name = parts[5];
       std::string value = parts[6];
 
-      CefCookie cookie;
+      CefCookie cookie = {};
+      cookie.size = sizeof(CefCookie);
       CefString(&cookie.name) = name;
       CefString(&cookie.value) = value;
       CefString(&cookie.domain) = domain;
