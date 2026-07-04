@@ -146,16 +146,19 @@ class ClientRenderDelegate : public ClientAppRenderer::Delegate {
     const storedCam = getStoredDeviceId('videoinput');
     const storedMic = getStoredDeviceId('audioinput');
 
+    const hasStoredCam = storedCam && storedCam !== "";
+    const hasStoredMic = storedMic && storedMic !== "";
+
     // If we already have stored selections, apply them directly.
-    if ((!needsVideo || storedCam) && (!needsAudio || storedMic)) {
-      if (needsVideo && storedCam) {
+    if ((!needsVideo || hasStoredCam) && (!needsAudio || hasStoredMic)) {
+      if (needsVideo && hasStoredCam) {
         if (typeof constraints.video === 'object') {
           constraints.video.deviceId = { exact: storedCam };
         } else {
           constraints.video = { deviceId: { exact: storedCam } };
         }
       }
-      if (needsAudio && storedMic) {
+      if (needsAudio && hasStoredMic) {
         if (typeof constraints.audio === 'object') {
           constraints.audio.deviceId = { exact: storedMic };
         } else {
@@ -165,13 +168,12 @@ class ClientRenderDelegate : public ClientAppRenderer::Delegate {
       return _origGetUserMedia(constraints);
     }
 
-    // Enumerate devices and show picker if needed.
-    return navigator.mediaDevices.enumerateDevices().then(function(devices) {
-      const cameras = devices.filter(d => d.kind === 'videoinput');
-      const mics = devices.filter(d => d.kind === 'audioinput');
+    function showPickerOrProceed(devices) {
+      const cameras = devices.filter(d => d.kind === 'videoinput' && d.deviceId && d.deviceId !== "");
+      const mics = devices.filter(d => d.kind === 'audioinput' && d.deviceId && d.deviceId !== "");
 
-      const multipleCams = needsVideo && cameras.length > 1 && !storedCam;
-      const multipleMics = needsAudio && mics.length > 1 && !storedMic;
+      const multipleCams = needsVideo && cameras.length > 1 && !hasStoredCam;
+      const multipleMics = needsAudio && mics.length > 1 && !hasStoredMic;
 
       if (!multipleCams && !multipleMics) {
         // Only one device or already selected, proceed normally.
@@ -189,7 +191,7 @@ class ClientRenderDelegate : public ClientAppRenderer::Delegate {
         function waitForBody() {
           if (document.body) {
             createPickerUI(devices, function(camId, micId) {
-              if (camId) {
+              if (camId && camId !== "") {
                 storeDeviceId('videoinput', camId);
                 if (typeof constraints.video === 'object') {
                   constraints.video.deviceId = { exact: camId };
@@ -197,7 +199,7 @@ class ClientRenderDelegate : public ClientAppRenderer::Delegate {
                   constraints.video = { deviceId: { exact: camId } };
                 }
               }
-              if (micId) {
+              if (micId && micId !== "") {
                 storeDeviceId('audioinput', micId);
                 if (typeof constraints.audio === 'object') {
                   constraints.audio.deviceId = { exact: micId };
@@ -213,6 +215,28 @@ class ClientRenderDelegate : public ClientAppRenderer::Delegate {
         }
         waitForBody();
       });
+    }
+
+    // Enumerate devices and check if we have access to device labels/IDs.
+    return navigator.mediaDevices.enumerateDevices().then(function(devices) {
+      const hasLabels = devices.some(d => d.label !== "");
+      
+      // If we don't have labels yet, we need to bootstrap permission by making a quick temporary request.
+      if (!hasLabels && (needsVideo || needsAudio)) {
+        return _origGetUserMedia({ video: needsVideo, audio: needsAudio }).then(function(tempStream) {
+          // Instantly stop the temporary stream's tracks so we don't hold the camera active.
+          tempStream.getTracks().forEach(track => track.stop());
+          // Query the devices list again now that permission is granted.
+          return navigator.mediaDevices.enumerateDevices();
+        }).then(function(labeledDevices) {
+          return showPickerOrProceed(labeledDevices);
+        }).catch(function() {
+          // Fallback to default in case of any failure.
+          return _origGetUserMedia(constraints);
+        });
+      }
+
+      return showPickerOrProceed(devices);
     });
   };
 })();
