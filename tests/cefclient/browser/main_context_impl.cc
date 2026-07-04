@@ -19,7 +19,7 @@ namespace {
 
 // The default URL to load in a browser window.
 //const char kDefaultUrl[] = "https://www.google.com";
-const char kDefaultUrl[] = "https://www.youtube.com"; // SpoutBrowser: custom splash screen
+const char kDefaultUrl[] = "https://bntre.github.io/SpoutBrowser/"; // SpoutBrowser: custom splash screen
 
 // Returns the ARGB value for |color|.
 cef_color_t ParseColor(const std::string& color) {
@@ -204,6 +204,7 @@ void MainContextImpl::PopulateSettings(CefSettings* settings) {
 
   CefString(&settings->cache_path) =
       command_line_->GetSwitchValue(switches::kCachePath);
+
 
   // SpoutBrowser: use cache per app by default
   CefString sCachePath(&settings->cache_path);

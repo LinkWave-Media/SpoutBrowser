@@ -44,10 +44,7 @@ class ClientRenderDelegate : public ClientAppRenderer::Delegate {
                         CefRefPtr<CefBrowser> browser,
                         CefRefPtr<CefFrame> frame,
                         CefRefPtr<CefV8Context> context) override {
-    std::string url = frame->GetURL().ToString();
-    if (url.rfind("https://tests/", 0) == 0) {
-      message_router_->OnContextCreated(browser, frame, context);
-    }
+    message_router_->OnContextCreated(browser, frame, context);
 
     // Inject the device picker JavaScript shim into main frames only.
     if (frame->IsMain()) {

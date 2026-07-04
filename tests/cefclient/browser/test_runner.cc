@@ -3,7 +3,6 @@
 // can be found in the LICENSE file.
 
 #include "tests/cefclient/browser/test_runner.h"
-#include "tests/cefclient/browser/google_auth_handler.h"
 
 #include <algorithm>
 #include <map>
@@ -825,10 +824,6 @@ void SetupResourceManager(CefRefPtr<CefResourceManager> resource_manager,
   resource_manager->AddProvider(
       CreateBinaryResourceProvider(test_origin, std::string()), 100,
       std::string());
-
-  // Read local web folder directory to support index.html with cefQuery under secure origin https://tests/
-  std::string web_dir = MainContext::Get()->GetAppWorkingDirectory() + "_SpoutBrowser_web";
-  resource_manager->AddDirectoryProvider(test_origin, web_dir, 50, std::string());
 #elif defined(OS_POSIX)
   // Read resources from a directory on disk.
   std::string resource_dir;
@@ -868,7 +863,6 @@ bool IsTestURL(const std::string& url, const std::string& path) {
 
 void CreateMessageHandlers(MessageHandlerSet& handlers) {
   handlers.insert(new PromptHandler);
-  handlers.insert(new GoogleAuthHandler);
 #if Removed_by_SpoutBrowser
   // Create the binary trasfer test handlers.
   binary_transfer_test::CreateMessageHandlers(handlers);

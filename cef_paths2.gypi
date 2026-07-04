@@ -263,8 +263,6 @@
       'tests/cefclient/browser/config_test.h',
       'tests/cefclient/browser/default_client_handler.cc',
       'tests/cefclient/browser/default_client_handler.h',
-      'tests/cefclient/browser/google_auth_handler.cc',
-      'tests/cefclient/browser/google_auth_handler.h',
       'tests/cefclient/browser/dialog_test.cc',
       'tests/cefclient/browser/dialog_test.h',
       'tests/cefclient/browser/hang_test.cc',
