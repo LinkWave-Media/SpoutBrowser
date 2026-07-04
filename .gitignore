@@ -7,3 +7,6 @@ Releases/
 # Python cache
 __pycache__/
 *.pyc
+
+# Local Google OAuth config file containing secrets
+_SpoutBrowser_web/auth_config.json

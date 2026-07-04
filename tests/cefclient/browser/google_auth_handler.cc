@@ -23,9 +23,40 @@ namespace client {
 
 namespace {
 
-// IMPORTANT: Replace this placeholder client ID with your actual Google OAuth Client ID
-// (configured as a "Desktop app" client type in the Google Cloud Console).
-const char kGoogleClientId[] = "467270992671-fdemtfgad80mok466hv1tb0lpgrr5ien.apps.googleusercontent.com";
+struct AuthConfig {
+  std::string client_id;
+  std::string client_secret;
+};
+
+AuthConfig LoadAuthConfig() {
+  AuthConfig config;
+  std::string path = MainContext::Get()->GetAppWorkingDirectory() + "_SpoutBrowser_web\\auth_config.json";
+  FILE* f = fopen(path.c_str(), "rb");
+  if (f) {
+    fseek(f, 0, SEEK_END);
+    long size = ftell(f);
+    if (size > 0) {
+      fseek(f, 0, SEEK_SET);
+      std::vector<char> buffer(size + 1, 0);
+      fread(buffer.data(), 1, size, f);
+      fclose(f);
+
+      CefRefPtr<CefValue> parsed = CefParseJSON(buffer.data(), JSON_PARSER_ALLOW_TRAILING_COMMAS);
+      if (parsed && parsed->GetType() == VTYPE_DICTIONARY) {
+        CefRefPtr<CefDictionaryValue> dict = parsed->GetDictionary();
+        if (dict->HasKey("client_id")) {
+          config.client_id = dict->GetString("client_id").ToString();
+        }
+        if (dict->HasKey("client_secret")) {
+          config.client_secret = dict->GetString("client_secret").ToString();
+        }
+      }
+    } else {
+      fclose(f);
+    }
+  }
+  return config;
+}
 
 const char kGoogleAuthUrl[] = "https://accounts.google.com/o/oauth2/v2/auth";
 const char kGoogleTokenUrl[] = "https://oauth2.googleapis.com/token";
@@ -293,8 +324,9 @@ void GoogleAuthHandler::StopLocalServer() {
 }
 
 void GoogleAuthHandler::LaunchSystemBrowser() {
+  AuthConfig config = LoadAuthConfig();
   std::string auth_url = std::string(kGoogleAuthUrl) +
-      "?client_id=" + UrlEncode(kGoogleClientId) +
+      "?client_id=" + UrlEncode(config.client_id) +
       "&redirect_uri=" + UrlEncode("http://127.0.0.1:3000/callback") +
       "&response_type=code" +
       "&scope=" + UrlEncode("openid email profile") +
@@ -314,8 +346,10 @@ void GoogleAuthHandler::ExchangeCodeForTokens(const std::string& code) {
   request->SetURL(kGoogleTokenUrl);
   request->SetMethod("POST");
 
+  AuthConfig config = LoadAuthConfig();
   std::string post_data = 
-      "client_id=" + UrlEncode(kGoogleClientId) +
+      "client_id=" + UrlEncode(config.client_id) +
+      "&client_secret=" + UrlEncode(config.client_secret) +
       "&code=" + UrlEncode(code) +
       "&code_verifier=" + UrlEncode(code_verifier_) +
       "&redirect_uri=" + UrlEncode("http://127.0.0.1:3000/callback") +
