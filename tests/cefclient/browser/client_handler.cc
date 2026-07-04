@@ -28,6 +28,10 @@
 #include "tests/shared/common/client_switches.h"
 #include "tests/shared/common/string_util.h"
 
+#if defined(OS_WIN)
+#include <windows.h>
+#endif
+
 namespace client {
 
 #if defined(OS_WIN)
@@ -47,6 +51,7 @@ enum client_menu_ids {
   CLIENT_ID_CURSOR_CHANGE_DISABLED,
   CLIENT_ID_MEDIA_HANDLING_DISABLED,
   CLIENT_ID_OFFLINE,
+  CLIENT_ID_CLEAR_CACHE,
   CLIENT_ID_TESTMENU_SUBMENU,
   CLIENT_ID_TESTMENU_CHECKITEM,
   CLIENT_ID_TESTMENU_RADIOITEM1,
@@ -477,6 +482,28 @@ void FilterContextMenuModel(CefRefPtr<CefMenuModel> model) {
   }
 }
 
+void ClearBrowserCacheAndCookies(CefRefPtr<CefBrowser> browser) {
+  CefRefPtr<CefRequestContext> request_context = browser->GetHost()->GetRequestContext();
+  if (request_context) {
+    CefRefPtr<CefCookieManager> cookie_manager = request_context->GetCookieManager(nullptr);
+    if (cookie_manager) {
+      cookie_manager->DeleteCookies(CefString(), CefString(), nullptr);
+    }
+    request_context->ClearCertificateExceptions(nullptr);
+    request_context->ClearHttpAuthCredentials(nullptr);
+    request_context->CloseAllConnections(nullptr);
+  }
+  browser->ReloadIgnoreCache();
+
+#if defined(OS_WIN)
+  MessageBoxA(
+      browser->GetHost()->GetWindowHandle(),
+      "Cookies, local storage, certificate exceptions, and HTTP credentials have been cleared.\n\nThe page is reloading.",
+      "Clear Cache",
+      MB_OK | MB_ICONINFORMATION);
+#endif
+}
+
 }  // namespace
 
 class ClientDownloadImageCallback : public CefDownloadImageCallback {
@@ -728,6 +755,9 @@ void ClientHandler::OnBeforeContextMenu(CefRefPtr<CefBrowser> browser,
       model->SetChecked(CLIENT_ID_OFFLINE, true);
     }
 
+    model->AddSeparator();
+    model->AddItem(CLIENT_ID_CLEAR_CACHE, "Clear cache and cookies");
+
 #if Removed_by_SpoutBrowser
     // Test context menu features.
     BuildTestMenu(browser, model);
@@ -768,6 +798,9 @@ bool ClientHandler::OnContextMenuCommand(CefRefPtr<CefBrowser> browser,
     case CLIENT_ID_OFFLINE:
       offline_ = !offline_;
       SetOfflineState(browser, offline_);
+      return true;
+    case CLIENT_ID_CLEAR_CACHE:
+      ClearBrowserCacheAndCookies(browser);
       return true;
     default:  // Allow default handling, if any.
       return ExecuteTestMenu(browser, command_id);
