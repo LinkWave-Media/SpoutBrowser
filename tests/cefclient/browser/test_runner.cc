@@ -825,6 +825,10 @@ void SetupResourceManager(CefRefPtr<CefResourceManager> resource_manager,
   resource_manager->AddProvider(
       CreateBinaryResourceProvider(test_origin, std::string()), 100,
       std::string());
+
+  // Read local web folder directory to support index.html with cefQuery under secure origin https://tests/
+  std::string web_dir = MainContext::Get()->GetAppWorkingDirectory() + "_SpoutBrowser_web";
+  resource_manager->AddDirectoryProvider(test_origin, web_dir, 50, std::string());
 #elif defined(OS_POSIX)
   // Read resources from a directory on disk.
   std::string resource_dir;
