@@ -70,20 +70,28 @@ std::vector<uint8_t> CalculateSha256(const std::string& input) {
   DWORD cbHashObject = 0, cbHash = 0, cbData = 0;
   std::vector<uint8_t> hash;
 
-  if (BCRYPT_SUCCESS(BCryptOpenAlgorithmProvider(&hAlg, BCRYPT_SHA256_ALGORITHM, NULL, 0))) {
+  NTSTATUS open_status = BCryptOpenAlgorithmProvider(&hAlg, BCRYPT_SHA256_ALGORITHM, NULL, 0);
+  if (BCRYPT_SUCCESS(open_status)) {
     if (BCRYPT_SUCCESS(BCryptGetProperty(hAlg, BCRYPT_OBJECT_LENGTH, (PBYTE)&cbHashObject, sizeof(DWORD), &cbData, 0))) {
       std::vector<uint8_t> hashObject(cbHashObject);
       if (BCRYPT_SUCCESS(BCryptGetProperty(hAlg, BCRYPT_HASH_LENGTH, (PBYTE)&cbHash, sizeof(DWORD), &cbData, 0))) {
         hash.resize(cbHash);
-        if (BCRYPT_SUCCESS(BCryptCreateHash(hAlg, &hHash, hashObject.data(), cbHashObject, NULL, 0, 0))) {
-          if (BCRYPT_SUCCESS(BCryptHashData(hHash, (PBYTE)input.c_str(), (ULONG)input.length(), 0))) {
-            BCryptFinishHash(hHash, hash.data(), cbHash, 0);
+        NTSTATUS create_status = BCryptCreateHash(hAlg, &hHash, hashObject.data(), cbHashObject, NULL, 0, 0);
+        if (BCRYPT_SUCCESS(create_status)) {
+          NTSTATUS hash_status = BCryptHashData(hHash, (PBYTE)input.c_str(), (ULONG)input.length(), 0);
+          if (!BCRYPT_SUCCESS(hash_status)) {
+            LOG(WARNING) << "[GoogleAuth] BCryptHashData failed: " << hash_status;
           }
+          BCryptFinishHash(hHash, hash.data(), cbHash, 0);
           BCryptDestroyHash(hHash);
+        } else {
+          LOG(WARNING) << "[GoogleAuth] BCryptCreateHash failed: " << create_status;
         }
       }
     }
     BCryptCloseAlgorithmProvider(hAlg, 0);
+  } else {
+    LOG(WARNING) << "[GoogleAuth] BCryptOpenAlgorithmProvider failed: " << open_status;
   }
   return hash;
 }
@@ -213,7 +221,7 @@ void GoogleAuthHandler::OnHttpRequest(CefRefPtr<CefServer> server,
     std::string query = CefString(&url_parts.query).ToString();
     std::string code;
     std::string received_state;
-    LOG(INFO) << "[GoogleAuth] Received callback query: " << query;
+    LOG(WARNING) << "[GoogleAuth] Received callback query: " << query;
     std::stringstream ss(query);
     std::string item;
     cef_uri_unescape_rule_t unescape_rules = static_cast<cef_uri_unescape_rule_t>(
@@ -225,15 +233,15 @@ void GoogleAuthHandler::OnHttpRequest(CefRefPtr<CefServer> server,
         std::string val = item.substr(eq + 1);
         if (key == "code") {
           code = CefURIDecode(val, false, unescape_rules).ToString();
-          LOG(INFO) << "[GoogleAuth] Parsed code: " << code;
+          LOG(WARNING) << "[GoogleAuth] Parsed code: " << code;
         } else if (key == "state") {
           received_state = CefURIDecode(val, false, unescape_rules).ToString();
-          LOG(INFO) << "[GoogleAuth] Parsed state: " << received_state;
+          LOG(WARNING) << "[GoogleAuth] Parsed state: " << received_state;
         }
       }
     }
 
-    LOG(INFO) << "[GoogleAuth] Expected state: " << state_;
+    LOG(WARNING) << "[GoogleAuth] Expected state: " << state_;
 
     if (received_state != state_) {
       server->SendHttp500Response(connection_id, "State parameter mismatch (potential CSRF).");
@@ -313,7 +321,7 @@ void GoogleAuthHandler::ExchangeCodeForTokens(const std::string& code) {
       "&redirect_uri=" + UrlEncode("http://127.0.0.1:3000/callback") +
       "&grant_type=authorization_code";
 
-  LOG(INFO) << "[GoogleAuth] Exchanging code. Post data: " << post_data;
+  LOG(WARNING) << "[GoogleAuth] Exchanging code. Post data: " << post_data;
 
   CefRefPtr<CefPostData> postData = CefPostData::Create();
   CefRefPtr<CefPostDataElement> element = CefPostDataElement::Create();
@@ -327,7 +335,7 @@ void GoogleAuthHandler::ExchangeCodeForTokens(const std::string& code) {
 
   CefRefPtr<RequestClient> client = new RequestClient(base::BindOnce(
       [](CefRefPtr<GoogleAuthHandler> handler, int status, const std::string& data) {
-        LOG(INFO) << "[GoogleAuth] Token response status: " << status << ", body: " << data;
+        LOG(WARNING) << "[GoogleAuth] Token response status: " << status << ", body: " << data;
         if (status == 200) {
           CefRefPtr<CefValue> parsed = CefParseJSON(data, JSON_PARSER_ALLOW_TRAILING_COMMAS);
           if (parsed && parsed->GetType() == VTYPE_DICTIONARY) {
