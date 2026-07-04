@@ -1156,14 +1156,14 @@ void RootWindowWin::OnCreate(LPCREATESTRUCT lpCreateStruct) {
     const int ctrl_height = urlbar_height - padding * 2;
 
     back_hwnd_ = CreateWindow(
-        L"BUTTON", L"←", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED,
+        L"BUTTON", L"\u2190", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED,
         x_offset, padding, button_width, ctrl_height, hwnd_,
         reinterpret_cast<HMENU>(IDC_NAV_BACK), hInstance, nullptr);
     CHECK(back_hwnd_);
     x_offset += button_width;
 
     forward_hwnd_ = CreateWindow(
-        L"BUTTON", L"→",
+        L"BUTTON", L"\u2192",
         WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED, x_offset, padding,
         button_width, ctrl_height, hwnd_,
         reinterpret_cast<HMENU>(IDC_NAV_FORWARD), hInstance, nullptr);
@@ -1171,7 +1171,7 @@ void RootWindowWin::OnCreate(LPCREATESTRUCT lpCreateStruct) {
     x_offset += button_width;
 
     reload_hwnd_ = CreateWindow(
-        L"BUTTON", L"↻",
+        L"BUTTON", L"\u21BB",
         WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED, x_offset, padding,
         button_width, ctrl_height, hwnd_,
         reinterpret_cast<HMENU>(IDC_NAV_RELOAD), hInstance, nullptr);
@@ -1179,7 +1179,7 @@ void RootWindowWin::OnCreate(LPCREATESTRUCT lpCreateStruct) {
     x_offset += button_width;
 
     stop_hwnd_ = CreateWindow(
-        L"BUTTON", L"✕", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED,
+        L"BUTTON", L"\u2715", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_DISABLED,
         x_offset, padding, button_width, ctrl_height, hwnd_,
         reinterpret_cast<HMENU>(IDC_NAV_STOP), hInstance, nullptr);
     CHECK(stop_hwnd_);
