@@ -351,7 +351,11 @@ void GoogleAuthHandler::ExchangeCodeForTokens(const std::string& code) {
             return;
           }
         }
-        handler->SendFailureToJS("Token exchange failed: HTTP " + std::to_string(status));
+        std::string err_msg = "Token exchange failed: HTTP " + std::to_string(status);
+        if (!data.empty()) {
+          err_msg += " - " + data;
+        }
+        handler->SendFailureToJS(err_msg);
       }, CefRefPtr<GoogleAuthHandler>(this)));
 
   CefURLRequest::Create(request, client.get(), nullptr);
@@ -404,7 +408,11 @@ void GoogleAuthHandler::FetchUserProfile(const std::string& access_token) {
             return;
           }
         }
-        handler->SendFailureToJS("Failed fetching profile info: HTTP " + std::to_string(status));
+        std::string err_msg = "Failed fetching profile info: HTTP " + std::to_string(status);
+        if (!data.empty()) {
+          err_msg += " - " + data;
+        }
+        handler->SendFailureToJS(err_msg);
       }, CefRefPtr<GoogleAuthHandler>(this)));
 
   CefURLRequest::Create(request, client.get(), nullptr);
