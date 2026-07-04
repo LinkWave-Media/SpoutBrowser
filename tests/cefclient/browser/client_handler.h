@@ -261,6 +261,12 @@ class ClientHandler : public BaseClientHandler,
       const CefString& requesting_origin,
       uint32_t requested_permissions,
       CefRefPtr<CefMediaAccessCallback> callback) override;
+  bool OnShowPermissionPrompt(
+      CefRefPtr<CefBrowser> browser,
+      uint64_t prompt_id,
+      const CefString& requesting_origin,
+      uint32_t requested_permissions,
+      CefRefPtr<CefPermissionPromptCallback> callback) override;
 
   // CefRequestHandler methods
   bool OnOpenURLFromTab(
@@ -392,7 +398,7 @@ class ClientHandler : public BaseClientHandler,
   bool mouse_cursor_change_disabled_;
 
   // True if media handling is disabled.
-  bool media_handling_disabled_ = true;
+  bool media_handling_disabled_ = false;
 
   // True if the browser is currently offline.
   bool offline_;

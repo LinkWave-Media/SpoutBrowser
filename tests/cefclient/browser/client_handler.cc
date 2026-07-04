@@ -1100,6 +1100,24 @@ bool ClientHandler::OnRequestMediaAccessPermission(
   return true;
 }
 
+bool ClientHandler::OnShowPermissionPrompt(
+    CefRefPtr<CefBrowser> browser,
+    uint64_t prompt_id,
+    const CefString& requesting_origin,
+    uint32_t requested_permissions,
+    CefRefPtr<CefPermissionPromptCallback> callback) {
+  // Auto-accept camera and microphone permission prompts since SpoutBrowser
+  // has no UI to display these prompts to the user.
+  if (requested_permissions &
+      (CEF_PERMISSION_TYPE_CAMERA_STREAM | CEF_PERMISSION_TYPE_MIC_STREAM)) {
+    callback->Continue(CEF_PERMISSION_RESULT_ACCEPT);
+    return true;
+  }
+
+  // Use default handling for other permission types.
+  return false;
+}
+
 bool ClientHandler::OnOpenURLFromTab(
     CefRefPtr<CefBrowser> browser,
     CefRefPtr<CefFrame> frame,
