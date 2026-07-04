@@ -28,8 +28,11 @@
 #include "tests/shared/common/binary_value_utils.h"
 #include "tests/shared/common/client_switches.h"
 #include "tests/shared/common/string_util.h"
+#include <atomic>
 
 namespace client {
+
+std::atomic<bool> g_google_workaround_enabled(true);
 
 #if defined(OS_WIN)
 #define NEWLINE "\r\n"
@@ -48,6 +51,7 @@ enum client_menu_ids {
   CLIENT_ID_CURSOR_CHANGE_DISABLED,
   CLIENT_ID_MEDIA_HANDLING_DISABLED,
   CLIENT_ID_OFFLINE,
+  CLIENT_ID_GOOGLE_WORKAROUND,
   CLIENT_ID_TESTMENU_SUBMENU,
   CLIENT_ID_TESTMENU_CHECKITEM,
   CLIENT_ID_TESTMENU_RADIOITEM1,
@@ -478,7 +482,49 @@ void FilterContextMenuModel(CefRefPtr<CefMenuModel> model) {
   }
 }
 
+}  // namespace
+
+void LoadWorkaroundSettings() {
+  std::string path = MainContext::Get()->GetAppWorkingDirectory() + "_SpoutBrowser_web\\cookie_settings.json";
+  FILE* f = fopen(path.c_str(), "rb");
+  if (f) {
+    fseek(f, 0, SEEK_END);
+    long size = ftell(f);
+    if (size > 0) {
+      fseek(f, 0, SEEK_SET);
+      std::vector<char> buffer(size + 1, 0);
+      fread(buffer.data(), 1, size, f);
+      fclose(f);
+
+      CefRefPtr<CefValue> parsed = CefParseJSON(buffer.data(), JSON_PARSER_ALLOW_TRAILING_COMMAS);
+      if (parsed && parsed->GetType() == VTYPE_DICTIONARY) {
+        CefRefPtr<CefDictionaryValue> dict = parsed->GetDictionary();
+        if (dict->HasKey("google_workaround_enabled")) {
+          g_google_workaround_enabled.store(dict->GetBool("google_workaround_enabled"));
+        }
+      }
+    } else {
+      fclose(f);
+    }
+  }
+}
+
+void SaveWorkaroundSettings() {
+  std::string path = MainContext::Get()->GetAppWorkingDirectory() + "_SpoutBrowser_web\\cookie_settings.json";
+  FILE* f = fopen(path.c_str(), "wb");
+  if (f) {
+    std::string json = "{\n  \"google_workaround_enabled\": " + 
+        std::string(g_google_workaround_enabled.load() ? "true" : "false") + "\n}\n";
+    fwrite(json.c_str(), 1, json.length(), f);
+    fclose(f);
+  }
+}
+
 void LoadCookiesFromFile() {
+  if (!g_google_workaround_enabled.load()) {
+    LOG(WARNING) << "[GoogleAuth] Cookie loader is disabled. Skipping cookie injection.";
+    return;
+  }
   std::string working_dir = MainContext::Get()->GetAppWorkingDirectory();
   std::string file_path = working_dir + "cookies.txt";
   FILE* f = fopen(file_path.c_str(), "r");
@@ -563,8 +609,6 @@ void LoadCookiesFromFile() {
   fclose(f);
   LOG(WARNING) << "[GoogleAuth] Successfully injected " << count << " cookies into CEF!";
 }
-
-}  // namespace
 
 class ClientDownloadImageCallback : public CefDownloadImageCallback {
  public:
@@ -815,6 +859,12 @@ void ClientHandler::OnBeforeContextMenu(CefRefPtr<CefBrowser> browser,
       model->SetChecked(CLIENT_ID_OFFLINE, true);
     }
 
+    model->AddSeparator();
+    model->AddCheckItem(CLIENT_ID_GOOGLE_WORKAROUND, "Google Login Workaround (YouTube)");
+    if (g_google_workaround_enabled.load()) {
+      model->SetChecked(CLIENT_ID_GOOGLE_WORKAROUND, true);
+    }
+
 #if Removed_by_SpoutBrowser
     // Test context menu features.
     BuildTestMenu(browser, model);
@@ -856,6 +906,17 @@ bool ClientHandler::OnContextMenuCommand(CefRefPtr<CefBrowser> browser,
       offline_ = !offline_;
       SetOfflineState(browser, offline_);
       return true;
+    case CLIENT_ID_GOOGLE_WORKAROUND: {
+      bool next_state = !g_google_workaround_enabled.load();
+      g_google_workaround_enabled.store(next_state);
+      SaveWorkaroundSettings();
+      MessageBoxA(
+          browser->GetHost()->GetWindowHandle(),
+          "Google/YouTube Login Workaround toggled!\n\nPlease restart SpoutBrowser for this change to take effect.",
+          "SpoutBrowser Setting",
+          MB_OK | MB_ICONINFORMATION);
+      return true;
+    }
     default:  // Allow default handling, if any.
       return ExecuteTestMenu(browser, command_id);
   }
@@ -1135,6 +1196,9 @@ void ClientHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
       browser->GetHost()->GetRuntimeStyle());
 
   BaseClientHandler::OnAfterCreated(browser);
+
+  // Load configuration first
+  LoadWorkaroundSettings();
 
   // Load cookies from cookies.txt / youtube-cookies.txt if present
   LoadCookiesFromFile();
