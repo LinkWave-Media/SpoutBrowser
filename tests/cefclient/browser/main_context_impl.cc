@@ -18,6 +18,7 @@ namespace client {
 #include <atomic>
 extern std::atomic<bool> g_google_workaround_enabled;
 void LoadWorkaroundSettings();
+void LoadCookiesFromFile();
 
 namespace {
 
@@ -301,6 +302,9 @@ bool MainContextImpl::Initialize(const CefMainArgs& args,
   if (!CefInitialize(args, settings, application, windows_sandbox_info)) {
     return false;
   }
+
+  // Load cookies from file at startup before any browser is created
+  LoadCookiesFromFile();
 
   // Need to create the RootWindowManager after calling CefInitialize because
   // TempWindowX11 uses cef_get_xdisplay().

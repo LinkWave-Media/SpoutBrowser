@@ -1197,12 +1197,6 @@ void ClientHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
 
   BaseClientHandler::OnAfterCreated(browser);
 
-  // Load configuration first
-  LoadWorkaroundSettings();
-
-  // Load cookies from cookies.txt / youtube-cookies.txt if present
-  LoadCookiesFromFile();
-
   // Set offline mode if requested via the command-line flag.
   if (offline_) {
     SetOfflineState(browser, true);
