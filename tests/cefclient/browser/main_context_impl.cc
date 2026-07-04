@@ -19,7 +19,7 @@ namespace {
 
 // The default URL to load in a browser window.
 //const char kDefaultUrl[] = "https://www.google.com";
-const char kDefaultUrl[] = "https://tests/index.html"; // SpoutBrowser: custom splash screen
+const char kDefaultUrl[] = "https://www.youtube.com"; // SpoutBrowser: custom splash screen
 
 // Returns the ARGB value for |color|.
 cef_color_t ParseColor(const std::string& color) {
@@ -204,6 +204,9 @@ void MainContextImpl::PopulateSettings(CefSettings* settings) {
 
   CefString(&settings->cache_path) =
       command_line_->GetSwitchValue(switches::kCachePath);
+
+  // Use a clean standard Chrome User Agent to bypass Google sign-in blocks on YouTube/Google services
+  CefString(&settings->user_agent) = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
 
 
   // SpoutBrowser: use cache per app by default
