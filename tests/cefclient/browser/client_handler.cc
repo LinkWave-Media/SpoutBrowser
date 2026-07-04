@@ -13,6 +13,7 @@
 
 #include "include/base/cef_callback.h"
 #include "include/cef_browser.h"
+#include "include/cef_cookie.h"
 #include "include/cef_frame.h"
 #include "include/cef_id_mappers.h"
 #include "include/cef_parser.h"
@@ -475,6 +476,92 @@ void FilterContextMenuModel(CefRefPtr<CefMenuModel> model) {
       model->RemoveAt(i);
     }
   }
+}
+
+void LoadCookiesFromFile() {
+  std::string working_dir = MainContext::Get()->GetAppWorkingDirectory();
+  std::string file_path = working_dir + "cookies.txt";
+  FILE* f = fopen(file_path.c_str(), "r");
+  if (!f) {
+    // Try fallback to youtube-cookies.txt
+    file_path = working_dir + "youtube-cookies.txt";
+    f = fopen(file_path.c_str(), "r");
+  }
+
+  if (!f) {
+    LOG(WARNING) << "[GoogleAuth] No cookies.txt or youtube-cookies.txt found. Skipping cookie injection.";
+    return;
+  }
+
+  LOG(WARNING) << "[GoogleAuth] Found cookie file: " << file_path << ". Starting injection...";
+  CefRefPtr<CefCookieManager> manager = CefCookieManager::GetGlobalManager(nullptr);
+  if (!manager) {
+    fclose(f);
+    LOG(WARNING) << "[GoogleAuth] Failed to get global cookie manager!";
+    return;
+  }
+
+  char line[2048];
+  int count = 0;
+  while (fgets(line, sizeof(line), f)) {
+    std::string s(line);
+    // Trim newlines/whitespace
+    s.erase(s.find_last_not_of(" \r\n\t") + 1);
+    if (s.empty() || s[0] == '#') {
+      // Check if it's HttpOnly cookie written as #HttpOnly_
+      if (s.rfind("#HttpOnly_", 0) != 0) {
+        continue;
+      }
+    }
+
+    bool httponly = false;
+    if (s.rfind("#HttpOnly_", 0) == 0) {
+      httponly = true;
+      s = s.substr(10); // Strip "#HttpOnly_"
+    }
+
+    std::vector<std::string> parts;
+    std::stringstream ss(s);
+    std::string part;
+    while (std::getline(ss, part, '\t')) {
+      parts.push_back(part);
+    }
+
+    if (parts.size() >= 7) {
+      std::string domain = parts[0];
+      std::string subdomain_flag = parts[1];
+      std::string path = parts[2];
+      std::string secure_flag = parts[3];
+      std::string expires_str = parts[4];
+      std::string name = parts[5];
+      std::string value = parts[6];
+
+      CefCookie cookie;
+      CefString(&cookie.name) = name;
+      CefString(&cookie.value) = value;
+      CefString(&cookie.domain) = domain;
+      CefString(&cookie.path) = path;
+      cookie.secure = (secure_flag == "TRUE" || secure_flag == "true");
+      cookie.httponly = httponly;
+      cookie.has_expires = true;
+      
+      try {
+        // Unix epoch to Windows FILETIME (microseconds)
+        int64_t unix_time = std::stoll(expires_str);
+        cookie.expires.val = (unix_time + 11644473600LL) * 1000000LL;
+      } catch (...) {
+        cookie.has_expires = false;
+      }
+
+      std::string url = (cookie.secure ? "https://" : "http://") + 
+          (domain[0] == '.' ? domain.substr(1) : domain) + path;
+
+      manager->SetCookie(url, cookie, nullptr);
+      count++;
+    }
+  }
+  fclose(f);
+  LOG(WARNING) << "[GoogleAuth] Successfully injected " << count << " cookies into CEF!";
 }
 
 }  // namespace
@@ -1048,6 +1135,9 @@ void ClientHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser) {
       browser->GetHost()->GetRuntimeStyle());
 
   BaseClientHandler::OnAfterCreated(browser);
+
+  // Load cookies from cookies.txt / youtube-cookies.txt if present
+  LoadCookiesFromFile();
 
   // Set offline mode if requested via the command-line flag.
   if (offline_) {
