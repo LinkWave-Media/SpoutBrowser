@@ -136,6 +136,7 @@ set "CEF_ROOT=%CEF_DOWNLOAD_DIR%\%CEF_DISTRIBUTION%"
 
     cmake ^
         -D "SPOUT_TAG=%SPOUT_TAG%" ^
+        -D "USE_SANDBOX=OFF" ^
         -G "%VS_GENERATOR%" ^
         -A x64 ^
         -B "%BUILD_DIR%" ^
