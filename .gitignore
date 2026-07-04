@@ -10,4 +10,3 @@ __pycache__/
 
 # Local Google OAuth config file containing secrets
 _SpoutBrowser_web/auth_config.json
-_SpoutBrowser_web/cookie_settings.json

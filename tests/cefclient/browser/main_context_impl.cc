@@ -15,11 +15,6 @@
 
 namespace client {
 
-#include <atomic>
-extern std::atomic<bool> g_google_workaround_enabled;
-void LoadWorkaroundSettings();
-void LoadCookiesFromFile();
-
 namespace {
 
 // The default URL to load in a browser window.
@@ -210,13 +205,8 @@ void MainContextImpl::PopulateSettings(CefSettings* settings) {
   CefString(&settings->cache_path) =
       command_line_->GetSwitchValue(switches::kCachePath);
 
-  // Load configuration first
-  LoadWorkaroundSettings();
-
-  if (g_google_workaround_enabled.load()) {
-    // Use a clean standard Chrome User Agent to bypass Google sign-in blocks on YouTube/Google services
-    CefString(&settings->user_agent) = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
-  }
+  // Use a clean standard Chrome User Agent to bypass Google sign-in blocks on YouTube/Google services
+  CefString(&settings->user_agent) = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
 
 
   // SpoutBrowser: use cache per app by default
@@ -302,9 +292,6 @@ bool MainContextImpl::Initialize(const CefMainArgs& args,
   if (!CefInitialize(args, settings, application, windows_sandbox_info)) {
     return false;
   }
-
-  // Load cookies from file at startup before any browser is created
-  LoadCookiesFromFile();
 
   // Need to create the RootWindowManager after calling CefInitialize because
   // TempWindowX11 uses cef_get_xdisplay().
