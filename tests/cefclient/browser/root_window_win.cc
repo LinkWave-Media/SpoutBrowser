@@ -322,6 +322,47 @@ void RootWindowWin::InitAsPopup(RootWindow::Delegate* delegate,
   initial_bounds_ = ClampBoundsToDisplay(
       CefDisplay::ConvertScreenRectToPixels(initial_bounds_));
 
+  // If the website didn't specify pop-up size, copy the dimensions and position of the current
+  // window to prevent it from appearing tiny.
+  if (!popupFeatures.widthSet || !popupFeatures.heightSet || !popupFeatures.xSet || !popupFeatures.ySet) {
+    int fallback_x = 100;
+    int fallback_y = 100;
+    int fallback_width = 1280;
+    int fallback_height = 800;
+
+    HWND foreground_hwnd = ::GetForegroundWindow();
+    DWORD process_id = 0;
+    ::GetWindowThreadProcessId(foreground_hwnd, &process_id);
+    if (foreground_hwnd && process_id == ::GetCurrentProcessId()) {
+      RECT rect;
+      if (::GetWindowRect(foreground_hwnd, &rect)) {
+        fallback_x = rect.left + 40;
+        fallback_y = rect.top + 40;
+        fallback_width = rect.right - rect.left;
+        fallback_height = rect.bottom - rect.top;
+      }
+    }
+
+    if (fallback_width < 1024) fallback_width = 1024;
+    if (fallback_height < 768) fallback_height = 768;
+
+    if (!popupFeatures.widthSet) {
+      initial_bounds_.width = fallback_width;
+    }
+    if (!popupFeatures.heightSet) {
+      initial_bounds_.height = fallback_height;
+    }
+    if (!popupFeatures.xSet) {
+      initial_bounds_.x = fallback_x;
+    }
+    if (!popupFeatures.ySet) {
+      initial_bounds_.y = fallback_y;
+    }
+
+    // Clamp the newly generated fallback bounds.
+    initial_bounds_ = ClampBoundsToDisplay(initial_bounds_);
+  }
+
   if (with_osr_) {
     initial_scale_factor_ =
         GetScaleFactor(initial_bounds_, std::nullopt, /*pixel_bounds=*/true);
