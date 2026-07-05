@@ -211,6 +211,9 @@ void MainContextImpl::PopulateSettings(CefSettings* settings) {
       sCachePath = GetAppWorkingDirectory() + "cache";
   }
 
+  // SpoutBrowser: set standard Chrome User-Agent to bypass bot detection on sites like Reddit
+  CefString(&settings->user_agent) = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36";
+
 
   if (use_windowless_rendering_) {
     settings->windowless_rendering_enabled = true;
