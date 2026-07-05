@@ -3,6 +3,7 @@
 // can be found in the LICENSE file.
 
 #include "tests/cefclient/browser/root_window_win.h"
+#include "include/cef_version.h"
 
 #include <shellscalingapi.h>
 
@@ -817,7 +818,9 @@ LRESULT CALLBACK RootWindowWin::RootWndProc(HWND hWnd,
           // notifications) will be blocked until the nested loop exits. This
           // should be reentrancy safe because no other C++ symbols are on the
           // stack.
+#if CEF_VERSION_MAJOR >= 142
           CefScopedSetNestableTasksAllowed allowed;
+#endif
           return DefWindowProc(hWnd, WM_SYSCOMMAND, wParam, lParam);
         }
       }

@@ -7,11 +7,14 @@
 #include <algorithm>
 #include <memory>
 
+#include "include/cef_version.h"
 #include "include/cef_command_line.h"
 #include "include/cef_sandbox_win.h"
+#if CEF_VERSION_MAJOR >= 142
 #include "include/wrapper/cef_certificate_util_win.h"
 #include "include/wrapper/cef_library_loader.h"
 #include "include/wrapper/cef_util_win.h"
+#endif
 #include "tests/cefclient/browser/main_context_impl.h"
 #include "tests/cefclient/browser/main_message_loop_multithreaded_win.h"
 #include "tests/cefclient/browser/resource.h"
@@ -52,6 +55,7 @@ void SetHighPerformanceGpuPreference() {
   }
 }
 
+#if CEF_VERSION_MAJOR >= 142
 // Configure code signing requirements. For a code signing example see
 // https://github.com/chromiumembedded/cef/issues/3824#issuecomment-2892139995
 
@@ -91,7 +95,9 @@ const char* RequiredThumbprint(std::string* exe_thumbprint) {
 
   return nullptr;
 }
+#endif
 
+#if CEF_VERSION_MAJOR >= 142
 bool VerifyCodeSigningAndLoad(CefScopedLibraryLoader& library_loader,
                               cef_version_info_t* version_info) {
   // Enable early logging support (required before libcef is loaded).
@@ -136,14 +142,23 @@ bool VerifyCodeSigningAndLoad(CefScopedLibraryLoader& library_loader,
                                          RequiredThumbprint(&exe_thumbprint),
                                          kAllowUnsigned, version_info);
 }
+#endif
 
+#if CEF_VERSION_MAJOR >= 142
 int RunMain(HINSTANCE hInstance,
             int nCmdShow,
             void* sandbox_info,
             cef_version_info_t* version_info) {
+#else
+int RunMain(HINSTANCE hInstance,
+            int nCmdShow,
+            void* sandbox_info,
+            void* version_info = nullptr) {
+#endif
   SetHighPerformanceGpuPreference();
   CefMainArgs main_args(hInstance);
 
+#if CEF_VERSION_MAJOR >= 142
   // Dynamically load the CEF library after code signing verification.
   CefScopedLibraryLoader library_loader;
   if (!VerifyCodeSigningAndLoad(library_loader, version_info)) {
@@ -151,6 +166,7 @@ int RunMain(HINSTANCE hInstance,
     NOTREACHED();
     return CEF_RESULT_CODE_KILLED;
   }
+#endif
 
   // The CEF library (libcef) is loaded at this point.
 
@@ -290,10 +306,13 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   sandbox_info = scoped_sandbox.sandbox_info();
 #endif
 
+#if CEF_VERSION_MAJOR >= 142
   cef_version_info_t version_info = {};
   CEF_POPULATE_VERSION_INFO(&version_info);
-
   return client::RunMain(hInstance, nCmdShow, sandbox_info, &version_info);
+#else
+  return client::RunMain(hInstance, nCmdShow, sandbox_info, nullptr);
+#endif
 }
 
 #endif  // !defined(CEF_USE_BOOTSTRAP)

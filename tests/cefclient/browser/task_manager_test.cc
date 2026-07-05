@@ -3,6 +3,7 @@
 // can be found in the LICENSE file.
 
 #include "tests/cefclient/browser/task_manager_test.h"
+#include "include/cef_version.h"
 
 #include "include/cef_task_manager.h"
 
@@ -35,8 +36,13 @@ std::string TaskTypeToString(cef_task_type_t type) {
       return "Extension";
     case CEF_TASK_TYPE_GUEST:
       return "Guest";
+#if CEF_VERSION_MAJOR >= 142
     case CEF_TASK_TYPE_PLUGIN_DEPRECATED:
       return "Plugin (Deprecated)";
+#else
+    case CEF_TASK_TYPE_PLUGIN:
+      return "Plugin";
+#endif
     case CEF_TASK_TYPE_SANDBOX_HELPER:
       return "Sandbox Helper";
     case CEF_TASK_TYPE_DEDICATED_WORKER:
