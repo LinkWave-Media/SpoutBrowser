@@ -9,6 +9,9 @@
 
 #include <memory>
 #include <optional>
+#include <sstream>
+#include <iomanip>
+#include <cwctype>
 
 #include "include/base/cef_build.h"
 #include "include/base/cef_callback.h"
@@ -206,6 +209,58 @@ void GetPixelBoundsAndContinue(HWND hwnd,
   } else {
     MAIN_POST_CLOSURE(base::BindOnce(std::move(next), pixel_bounds));
   }
+}
+
+// Helper function to check if the string is likely a URL.
+bool IsURL(const std::wstring& str) {
+  if (str.empty()) {
+    return false;
+  }
+  // If it has spaces, it is definitely a search query.
+  if (str.find(L' ') != std::wstring::npos) {
+    return false;
+  }
+  // If it has a known protocol prefix.
+  if (str.rfind(L"http://", 0) == 0 ||
+      str.rfind(L"https://", 0) == 0 ||
+      str.rfind(L"file://", 0) == 0 ||
+      str.rfind(L"localhost", 0) == 0 ||
+      str.rfind(L"about:", 0) == 0) {
+    return true;
+  }
+  // If it contains a dot, is not starting with a dot, and doesn't end with a dot,
+  // we assume it is a domain name.
+  size_t dot_pos = str.find(L'.');
+  if (dot_pos != std::wstring::npos && dot_pos > 0 && dot_pos < str.length() - 1) {
+    return true;
+  }
+  return false;
+}
+
+// Simple URL encoder for wide strings.
+std::wstring UrlEncode(const std::wstring& value) {
+  std::wostringstream escaped;
+  escaped << std::hex << std::uppercase;
+  for (wchar_t c : value) {
+    if (iswalnum(c) || c == L'-' || c == L'_' || c == L'.' || c == L'~') {
+      escaped << c;
+    } else if (c == L' ') {
+      escaped << L'+';
+    } else {
+      // Encode as UTF-8 bytes
+      if (c < 0x80) {
+        escaped << L'%' << std::setw(2) << std::setfill(L'0') << (int)c;
+      } else if (c < 0x800) {
+        escaped << L'%' << std::setw(2) << std::setfill(L'0') << (0xC0 | ((c >> 6) & 0x1F));
+        escaped << L'%' << std::setw(2) << std::setfill(L'0') << (0x80 | (c & 0x3F));
+      } else {
+        escaped << L'%' << std::setw(2) << std::setfill(L'0') << (0xE0 | ((c >> 12) & 0x0F));
+        escaped << L'%' << std::setw(2) << std::setfill(L'0') << (0x80 | ((c >> 6) & 0x3F));
+        escaped << L'%' << std::setw(2) << std::setfill(L'0') << (0x80 | (c & 0x3F));
+      }
+    }
+  }
+  return escaped.str();
 }
 
 }  // namespace
@@ -663,7 +718,7 @@ LRESULT CALLBACK RootWindowWin::EditWndProc(HWND hWnd,
   switch (message) {
     case WM_CHAR:
       if (wParam == VK_RETURN) {
-        // When the user hits the enter key load the URL.
+        // When the user hits the enter key load the URL or search query.
         CefRefPtr<CefBrowser> browser = self->GetBrowser();
         if (browser) {
           wchar_t strPtr[MAX_URL_LENGTH + 1] = {0};
@@ -671,7 +726,28 @@ LRESULT CALLBACK RootWindowWin::EditWndProc(HWND hWnd,
           LRESULT strLen = SendMessage(hWnd, EM_GETLINE, 0, (LPARAM)strPtr);
           if (strLen > 0) {
             strPtr[strLen] = 0;
-            browser->GetMainFrame()->LoadURL(strPtr);
+            std::wstring inputStr(strPtr);
+            
+            // Trim leading/trailing whitespace
+            size_t first = inputStr.find_first_not_of(L" \t\r\n");
+            if (first != std::wstring::npos) {
+              size_t last = inputStr.find_last_not_of(L" \t\r\n");
+              inputStr = inputStr.substr(first, (last - first + 1));
+            }
+            
+            if (IsURL(inputStr)) {
+              // If it lacks a protocol, prepend https:// unless it's localhost or about:
+              if (inputStr.find(L"://") == std::wstring::npos &&
+                  inputStr.rfind(L"localhost", 0) != 0 &&
+                  inputStr.rfind(L"about:", 0) != 0) {
+                inputStr = L"https://" + inputStr;
+              }
+              browser->GetMainFrame()->LoadURL(inputStr);
+            } else {
+              // Redirect search queries to DuckDuckGo
+              std::wstring searchUrl = L"https://duckduckgo.com/?q=" + UrlEncode(inputStr);
+              browser->GetMainFrame()->LoadURL(searchUrl);
+            }
           }
         }
         return 0;
